@@ -128,3 +128,10 @@
     @apply font-sans;
   }
 }
+html {
+  font-size: 15px;
+}
+
+body {
+  font-family: var(--font-app), Arial, Helvetica, sans-serif;
+}
