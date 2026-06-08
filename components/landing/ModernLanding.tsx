@@ -1,29 +1,24 @@
-"use client";
-
-import AnimatedBackground from "./AnimatedBackground";
-import DemoSection from "./DemoSection";
-import FeaturesSection from "./FeaturesSection";
-import FinalCTA from "./FinalCTA";
-import HeroSection from "./HeroSection";
-import LandingFooter from "./LandingFooter";
 import LandingHeader from "./LandingHeader";
-import PricingSection from "./PricingSection";
-import WorkflowMarquee from "./WorkflowMarquee";
-import WorkflowSection from "./WorkflowSection";
+import HeroSection from "./HeroSection";
+import ProblemSection from "./sections/ProblemSection";
+import WorkflowSection from "./sections/WorkflowSection";
+import FeatureGridSection from "./sections/FeatureGridSection";
+import WorkflowEngineSection from "./sections/WorkflowEngineSection";
 
 export default function ModernLanding() {
   return (
-    <main className="min-h-screen overflow-hidden bg-[#050712] font-sans text-white antialiased">
-      <AnimatedBackground />
+    <main className="min-h-screen overflow-hidden bg-white text-slate-950">
       <LandingHeader />
+
       <HeroSection />
-      <WorkflowMarquee />
-      <FeaturesSection />
+
+      <ProblemSection />
+
       <WorkflowSection />
-      <DemoSection />
-      <PricingSection />
-      <FinalCTA />
-      <LandingFooter />
+
+      <FeatureGridSection />
+
+      <WorkflowEngineSection />
     </main>
   );
 }

@@ -4,14 +4,14 @@ import "./globals.css";
 
 const beVietnamPro = Be_Vietnam_Pro({
   subsets: ["latin", "vietnamese"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-app",
+  weight: ["400", "500", "600", "700", "800", "900"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
   title: "Content Chốt Đơn",
   description:
-    "AI Content Planner giúp người mới xây kênh bán hàng và affiliate.",
+    "AI Content Planner giúp người mới xây kênh bán hàng, affiliate và thương hiệu cá nhân.",
 };
 
 export default function RootLayout({
@@ -21,9 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi">
-      <body className={`${beVietnamPro.variable} font-sans antialiased`}>
-        {children}
-      </body>
+      <body className={beVietnamPro.className}>{children}</body>
     </html>
   );
 }
