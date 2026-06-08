@@ -30,6 +30,7 @@ function getSuccessMessage(message?: string) {
   const messages: Record<string, string> = {
     "check-email":
       "Đăng ký thành công. Nếu Supabase bật xác nhận email, hãy kiểm tra email trước khi đăng nhập.",
+    "logged-out": "Bạn đã đăng xuất thành công.",
   };
 
   return messages[message] || null;
@@ -40,6 +41,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   const errorMessage = getErrorMessage(params.error);
   const successMessage = getSuccessMessage(params.message);
+  const redirectedFrom = params.redirectedFrom;
 
   return (
     <main className="min-h-screen bg-[#F6FBF6] px-4 py-10 text-slate-950">
@@ -99,6 +101,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             ) : null}
 
             <form action={loginAction} className="mt-8 space-y-5">
+              {redirectedFrom ? (
+                <input type="hidden" name="redirectedFrom" value={redirectedFrom} />
+              ) : null}
               <div>
                 <label
                   htmlFor="email"

@@ -16,9 +16,16 @@ function getStringValue(formData: FormData, key: string) {
 export async function loginAction(formData: FormData) {
   const email = getStringValue(formData, "email");
   const password = getStringValue(formData, "password");
+  const redirectedFrom = getStringValue(formData, "redirectedFrom");
+
+  const redirectParams = new URLSearchParams();
+  if (redirectedFrom) {
+    redirectParams.set("redirectedFrom", redirectedFrom);
+  }
 
   if (!email || !password) {
-    redirect("/login?error=missing-fields");
+    redirectParams.set("error", "missing-fields");
+    redirect(`/login?${redirectParams.toString()}`);
   }
 
   const supabase = await createClient();
@@ -29,7 +36,12 @@ export async function loginAction(formData: FormData) {
   });
 
   if (error) {
-    redirect("/login?error=invalid-credentials");
+    redirectParams.set("error", "invalid-credentials");
+    redirect(`/login?${redirectParams.toString()}`);
+  }
+
+  if (redirectedFrom && redirectedFrom.startsWith("/")) {
+    redirect(redirectedFrom);
   }
 
   redirect("/app");
@@ -77,5 +89,5 @@ export async function logoutAction() {
 
   await supabase.auth.signOut();
 
-  redirect("/login");
+  redirect("/login?message=logged-out");
 }
