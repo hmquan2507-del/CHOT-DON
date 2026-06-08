@@ -7,10 +7,12 @@ import {
   Home,
   Lightbulb,
   LifeBuoy,
+  LogOut,
   Settings,
   Sparkles,
   UserCircle2,
 } from "lucide-react";
+import { logoutAction } from "@/app/(auth)/actions";
 
 const navItems = [
   { label: "Tổng quan", icon: Home, active: true },
@@ -25,84 +27,91 @@ const navItems = [
 
 export default function AppSidebar() {
   return (
-    <aside className="sticky top-0 hidden h-screen w-[240px] shrink-0 border-r border-[#DDEBE4] bg-white/82 backdrop-blur-2xl lg:flex lg:flex-col">
-      <div className="flex h-[84px] items-center px-6">
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#059669] text-white shadow-[0_18px_35px_rgba(5,150,105,0.22)]">
+    <aside className="sticky top-0 hidden h-screen w-[240px] shrink-0 border-r border-[#DDEBE2] bg-white/80 backdrop-blur-xl lg:block">
+      <div className="flex h-full flex-col px-6">
+        <div className="flex h-[84px] items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#059669] text-white shadow-lg shadow-emerald-600/20">
             <Sparkles className="h-5 w-5" strokeWidth={2.4} />
           </div>
 
-          <div className="text-[17px] font-black tracking-[-0.04em] text-[#07111F]">
-            Content Chốt Đơn
+          <div>
+            <div className="text-[17px] font-black tracking-[-0.04em] text-[#07111F]">
+              Content
+            </div>
+            <div className="-mt-1 text-[17px] font-black tracking-[-0.04em] text-[#059669]">
+              Chốt Đơn
+            </div>
           </div>
         </div>
-      </div>
 
-      <nav className="flex-1 space-y-1 px-5 py-3">
-        {navItems.map((item) => {
-          const Icon = item.icon;
+        <div className="mb-5 rounded-[24px] border border-emerald-100 bg-[#F3FBF5] p-4">
+          <div className="flex items-center gap-2 text-[13px] font-bold text-[#047857]">
+            <Crown className="h-4 w-4" />
+            Gói Free
+          </div>
 
-          return (
-            <a
-              key={item.label}
-              href="#"
-              className={`group flex h-12 items-center gap-3 rounded-2xl px-4 text-[14px] font-bold transition ${
-                item.active
-                  ? "bg-[#ECFDF5] text-[#047857] shadow-[inset_0_0_0_1px_rgba(5,150,105,0.08)]"
-                  : "text-slate-600 hover:bg-[#F7FAF4] hover:text-[#047857]"
-              }`}
-            >
-              <Icon
-                className={`h-5 w-5 ${
+          <p className="mt-2 text-[12px] leading-5 text-slate-500">
+            Lên kế hoạch nội dung, quản lý ý tưởng và chuẩn bị kịch bản bán
+            hàng.
+          </p>
+        </div>
+
+        <nav className="space-y-1.5">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+
+            return (
+              <button
+                key={item.label}
+                type="button"
+                className={[
+                  "group flex w-full items-center gap-3 rounded-2xl px-3.5 py-3 text-left text-[14px] font-bold transition",
                   item.active
-                    ? "text-[#059669]"
-                    : "text-slate-500 group-hover:text-[#059669]"
-                }`}
-                strokeWidth={2.2}
-              />
-              <span>{item.label}</span>
-            </a>
-          );
-        })}
-      </nav>
+                    ? "bg-[#07111F] text-white shadow-lg shadow-slate-950/10"
+                    : "text-slate-500 hover:bg-[#F3FBF5] hover:text-[#07111F]",
+                ].join(" ")}
+              >
+                <Icon
+                  className={[
+                    "h-4.5 w-4.5 transition",
+                    item.active
+                      ? "text-emerald-300"
+                      : "text-slate-400 group-hover:text-emerald-600",
+                  ].join(" ")}
+                />
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+        </nav>
 
-      <div className="space-y-4 px-5 pb-5">
-        <div className="rounded-[22px] border border-[#DDEBE4] bg-[#ECFDF5] p-4 shadow-[0_14px_34px_rgba(5,150,105,0.06)]">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-[#059669] shadow-sm">
-              <Crown className="h-5 w-5" strokeWidth={2.3} />
-            </div>
-
-            <div className="min-w-0">
-              <div className="text-[14px] font-black text-[#07111F]">
-                Nâng cấp Pro
+        <div className="mt-auto pb-6">
+          <div className="mb-3 rounded-[24px] border border-[#E8F2EA] bg-white p-4 shadow-sm">
+            <div className="flex items-start gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">
+                <LifeBuoy className="h-4.5 w-4.5" />
               </div>
-              <p className="mt-1 text-[12px] font-medium leading-5 text-slate-500">
-                Mở khóa tính năng nâng cao và AI không giới hạn
-              </p>
-            </div>
-          </div>
 
-          <button className="mt-4 h-11 w-full rounded-2xl bg-[#059669] text-[13px] font-black text-white shadow-[0_14px_28px_rgba(5,150,105,0.22)] transition hover:bg-[#047857]">
-            Nâng cấp ngay
-          </button>
-        </div>
-
-        <div className="rounded-[20px] border border-[#DDEBE4] bg-white p-4 shadow-[0_12px_30px_rgba(15,23,42,0.04)]">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#F7FAF4] text-slate-500">
-              <LifeBuoy className="h-5 w-5" strokeWidth={2.2} />
-            </div>
-
-            <div>
-              <div className="text-[13px] font-black text-[#07111F]">
-                Trung tâm hỗ trợ
-              </div>
-              <div className="mt-1 text-[12px] font-medium text-slate-500">
-                Góp ý & hỗ trợ 24/7
+              <div>
+                <p className="text-[13px] font-black text-[#07111F]">
+                  Cần hỗ trợ?
+                </p>
+                <p className="mt-1 text-[12px] leading-5 text-slate-500">
+                  Tối ưu kế hoạch nội dung và kịch bản bán hàng nhanh hơn.
+                </p>
               </div>
             </div>
           </div>
+
+          <form action={logoutAction}>
+            <button
+              type="submit"
+              className="flex w-full items-center gap-3 rounded-2xl px-3.5 py-3 text-left text-[14px] font-bold text-slate-500 transition hover:bg-red-50 hover:text-red-600"
+            >
+              <LogOut className="h-4.5 w-4.5" />
+              <span>Đăng xuất</span>
+            </button>
+          </form>
         </div>
       </div>
     </aside>
