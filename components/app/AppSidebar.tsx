@@ -33,7 +33,7 @@ export default function AppSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="sticky top-0 hidden h-screen w-[240px] shrink-0 border-r border-[#DDEBE2] bg-white/80 backdrop-blur-xl lg:block">
+    <aside className="fixed left-0 top-0 z-40 hidden h-screen w-[240px] shrink-0 border-r border-[#DDEBE2] bg-white/90 backdrop-blur-xl lg:block">
       <div className="flex h-full flex-col px-6">
         <div className="flex h-[84px] items-center gap-3">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#059669] text-white shadow-lg shadow-emerald-600/20">
