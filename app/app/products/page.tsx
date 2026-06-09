@@ -172,9 +172,6 @@ export default async function ProductsPage() {
           <h1 className="text-3xl font-black tracking-[-0.04em] text-slate-950 sm:text-4xl">
             Thư viện sản phẩm
           </h1>
-          <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-extrabold text-emerald-700 shadow-sm">
-            Phase 4
-          </span>
         </div>
 
         <p className="max-w-3xl text-base font-medium leading-7 text-slate-500">

@@ -39,9 +39,6 @@ export default async function ChannelPage() {
           <h1 className="text-3xl font-black tracking-tight text-slate-900">
             Hồ sơ kênh
           </h1>
-          <span className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">
-            Bước nền tảng
-          </span>
         </div>
         <p className="mt-2 text-[15px] text-slate-600">
           Thiết lập định vị kênh để AI tạo nội dung chính xác hơn.

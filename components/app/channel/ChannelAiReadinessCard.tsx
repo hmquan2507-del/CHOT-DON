@@ -2,7 +2,7 @@ import { Brain, CheckCircle2 } from "lucide-react";
 
 export function ChannelAiReadinessCard() {
   return (
-    <div className="rounded-[24px] border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="rounded-[24px] border border-slate-100 bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">

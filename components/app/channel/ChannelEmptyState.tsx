@@ -2,15 +2,15 @@ import { Sparkles, Target, CheckCircle2 } from "lucide-react";
 
 export function ChannelEmptyState() {
   return (
-    <div className="rounded-[24px] border border-slate-200 bg-white p-8 shadow-sm">
-      <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
-        <Target className="h-7 w-7" />
+    <div className="rounded-[24px] border border-slate-100 bg-white p-8 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
+      <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-100/50 text-emerald-600 shadow-sm">
+        <Target className="h-8 w-8" />
       </div>
 
       <h2 className="mb-2 text-xl font-bold text-slate-900">
         Tạo hồ sơ kênh đầu tiên
       </h2>
-      <p className="mb-6 text-sm leading-relaxed text-slate-600">
+      <p className="mb-6 text-[15px] leading-relaxed text-slate-600">
         AI cần hồ sơ kênh để tạo ý tưởng, script và lịch nội dung chính xác hơn.
       </p>
 

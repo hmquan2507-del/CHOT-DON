@@ -1,7 +1,7 @@
 "use client";
 
-import { Channel } from "@/types/channel";
 import { createChannel, updateChannel } from "@/actions/channels";
+import { Channel } from "@/types/channel";
 import { ChannelSubmitButton } from "./ChannelSubmitButton";
 
 interface ChannelProfileFormProps {
@@ -10,10 +10,8 @@ interface ChannelProfileFormProps {
 
 export function ChannelProfileForm({ channel }: ChannelProfileFormProps) {
   const mode = channel ? "update" : "create";
-  
-  const action = channel
-    ? updateChannel.bind(null, channel.id)
-    : createChannel;
+
+  const action = channel ? updateChannel.bind(null, channel.id) : createChannel;
 
   return (
     <div className="rounded-[24px] border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
@@ -21,7 +19,10 @@ export function ChannelProfileForm({ channel }: ChannelProfileFormProps) {
 
       <form action={action} className="space-y-6">
         <div>
-          <label htmlFor="name" className="mb-2 block text-[14px] font-bold text-slate-700">
+          <label
+            htmlFor="name"
+            className="mb-2 block text-[14px] font-bold text-slate-700"
+          >
             Tên kênh <span className="text-red-500">*</span>
           </label>
           <input
@@ -37,7 +38,10 @@ export function ChannelProfileForm({ channel }: ChannelProfileFormProps) {
 
         <div className="grid gap-6 sm:grid-cols-2">
           <div>
-            <label htmlFor="platform" className="mb-2 block text-[14px] font-bold text-slate-700">
+            <label
+              htmlFor="platform"
+              className="mb-2 block text-[14px] font-bold text-slate-700"
+            >
               Nền tảng <span className="text-red-500">*</span>
             </label>
             <select
@@ -47,7 +51,9 @@ export function ChannelProfileForm({ channel }: ChannelProfileFormProps) {
               required
               className="flex h-[52px] w-full items-center rounded-2xl border border-[#DDE6EC] bg-white px-4 text-[15px] text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
             >
-              <option value="" disabled>Chọn nền tảng</option>
+              <option value="" disabled>
+                Chọn nền tảng
+              </option>
               <option value="TikTok">TikTok</option>
               <option value="YouTube Shorts">YouTube Shorts</option>
               <option value="Facebook Reels">Facebook Reels</option>
@@ -56,7 +62,10 @@ export function ChannelProfileForm({ channel }: ChannelProfileFormProps) {
           </div>
 
           <div>
-            <label htmlFor="experience_level" className="mb-2 block text-[14px] font-bold text-slate-700">
+            <label
+              htmlFor="experience_level"
+              className="mb-2 block text-[14px] font-bold text-slate-700"
+            >
               Kinh nghiệm hiện tại
             </label>
             <select
@@ -65,17 +74,24 @@ export function ChannelProfileForm({ channel }: ChannelProfileFormProps) {
               defaultValue={channel?.experience_level || ""}
               className="flex h-[52px] w-full items-center rounded-2xl border border-[#DDE6EC] bg-white px-4 text-[15px] text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
             >
-              <option value="" disabled>Chọn mức độ</option>
+              <option value="" disabled>
+                Chọn mức độ
+              </option>
               <option value="Người mới bắt đầu">Người mới bắt đầu</option>
               <option value="Đã từng đăng video">Đã từng đăng video</option>
-              <option value="Đã có kênh nhưng chưa đều">Đã có kênh nhưng chưa đều</option>
+              <option value="Đã có kênh nhưng chưa đều">
+                Đã có kênh nhưng chưa đều
+              </option>
               <option value="Đã có doanh thu">Đã có doanh thu</option>
             </select>
           </div>
         </div>
 
         <div>
-          <label htmlFor="niche" className="mb-2 block text-[14px] font-bold text-slate-700">
+          <label
+            htmlFor="niche"
+            className="mb-2 block text-[14px] font-bold text-slate-700"
+          >
             Ngách (Niche) <span className="text-red-500">*</span>
           </label>
           <input
@@ -90,7 +106,10 @@ export function ChannelProfileForm({ channel }: ChannelProfileFormProps) {
         </div>
 
         <div>
-          <label htmlFor="goal" className="mb-2 block text-[14px] font-bold text-slate-700">
+          <label
+            htmlFor="goal"
+            className="mb-2 block text-[14px] font-bold text-slate-700"
+          >
             Mục tiêu kênh <span className="text-red-500">*</span>
           </label>
           <input
@@ -105,7 +124,10 @@ export function ChannelProfileForm({ channel }: ChannelProfileFormProps) {
         </div>
 
         <div>
-          <label htmlFor="target_audience" className="mb-2 block text-[14px] font-bold text-slate-700">
+          <label
+            htmlFor="target_audience"
+            className="mb-2 block text-[14px] font-bold text-slate-700"
+          >
             Tệp khách hàng
           </label>
           <textarea
@@ -114,12 +136,15 @@ export function ChannelProfileForm({ channel }: ChannelProfileFormProps) {
             defaultValue={channel?.target_audience || ""}
             rows={3}
             placeholder="Mô tả chi tiết về độ tuổi, sở thích, nỗi đau của khách hàng..."
-            className="flex w-full items-center rounded-2xl border border-[#DDE6EC] bg-white p-4 text-[15px] text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
+            className="flex w-full resize-none items-center rounded-2xl border border-[#DDE6EC] bg-white p-4 text-[15px] text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
           />
         </div>
 
         <div>
-          <label htmlFor="content_style" className="mb-2 block text-[14px] font-bold text-slate-700">
+          <label
+            htmlFor="content_style"
+            className="mb-2 block text-[14px] font-bold text-slate-700"
+          >
             Phong cách nội dung
           </label>
           <textarea
@@ -128,7 +153,7 @@ export function ChannelProfileForm({ channel }: ChannelProfileFormProps) {
             defaultValue={channel?.content_style || ""}
             rows={3}
             placeholder="Ví dụ: Chân thực, hài hước, review chi tiết, biến hình..."
-            className="flex w-full items-center rounded-2xl border border-[#DDE6EC] bg-white p-4 text-[15px] text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
+            className="flex w-full resize-none items-center rounded-2xl border border-[#DDE6EC] bg-white p-4 text-[15px] text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
           />
         </div>
 
@@ -136,9 +161,10 @@ export function ChannelProfileForm({ channel }: ChannelProfileFormProps) {
           <div className="sm:w-[60%]">
             <ChannelSubmitButton mode={mode} />
           </div>
+
           <button
             type="button"
-            className="flex h-[52px] flex-1 items-center justify-center rounded-2xl border border-[#DDE6EC] bg-white px-6 text-[15px] font-bold text-slate-700 transition hover:bg-slate-50 hover:text-slate-900"
+            className="flex h-[52px] flex-1 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50/50 px-6 text-[15px] font-bold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
           >
             Xem preview
           </button>
