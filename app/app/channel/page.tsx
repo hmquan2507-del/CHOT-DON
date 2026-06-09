@@ -25,7 +25,7 @@ export default async function ChannelPage() {
     .single();
 
   return (
-    <div className="mx-auto max-w-6xl p-6 lg:p-8">
+    <div className="mx-auto max-w-[1280px] p-6 lg:p-8">
       {/* Header */}
       <div className="mb-8">
         <nav className="mb-3 flex items-center gap-2 text-sm font-medium text-slate-500">
