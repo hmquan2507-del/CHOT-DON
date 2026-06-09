@@ -1,3 +1,7 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   BarChart3,
   Box,
@@ -15,17 +19,19 @@ import {
 import { logoutAction } from "@/app/(auth)/actions";
 
 const navItems = [
-  { label: "Tổng quan", icon: Home, active: true },
-  { label: "Hồ sơ kênh", icon: UserCircle2, active: false },
-  { label: "Sản phẩm", icon: Box, active: false },
-  { label: "Ý tưởng", icon: Lightbulb, active: false },
-  { label: "Kịch bản", icon: FileText, active: false },
-  { label: "Lịch nội dung", icon: CalendarDays, active: false },
-  { label: "Phân tích", icon: BarChart3, active: false },
-  { label: "Cài đặt", icon: Settings, active: false },
+  { label: "Tổng quan", icon: Home, href: "/app" },
+  { label: "Hồ sơ kênh", icon: UserCircle2, href: "/app/channel" },
+  { label: "Sản phẩm", icon: Box, href: "/app/product" },
+  { label: "Ý tưởng", icon: Lightbulb, href: "/app/idea" },
+  { label: "Kịch bản", icon: FileText, href: "/app/script" },
+  { label: "Lịch nội dung", icon: CalendarDays, href: "/app/calendar" },
+  { label: "Phân tích", icon: BarChart3, href: "/app/analytics" },
+  { label: "Cài đặt", icon: Settings, href: "/app/settings" },
 ];
 
 export default function AppSidebar() {
+  const pathname = usePathname();
+
   return (
     <aside className="sticky top-0 hidden h-screen w-[240px] shrink-0 border-r border-[#DDEBE2] bg-white/80 backdrop-blur-xl lg:block">
       <div className="flex h-full flex-col px-6">
@@ -59,14 +65,15 @@ export default function AppSidebar() {
         <nav className="space-y-1.5">
           {navItems.map((item) => {
             const Icon = item.icon;
+            const isActive = pathname === item.href;
 
             return (
-              <button
+              <Link
                 key={item.label}
-                type="button"
+                href={item.href}
                 className={[
                   "group flex w-full items-center gap-3 rounded-2xl px-3.5 py-3 text-left text-[14px] font-bold transition",
-                  item.active
+                  isActive
                     ? "bg-[#07111F] text-white shadow-lg shadow-slate-950/10"
                     : "text-slate-500 hover:bg-[#F3FBF5] hover:text-[#07111F]",
                 ].join(" ")}
@@ -74,13 +81,13 @@ export default function AppSidebar() {
                 <Icon
                   className={[
                     "h-4.5 w-4.5 transition",
-                    item.active
+                    isActive
                       ? "text-emerald-300"
                       : "text-slate-400 group-hover:text-emerald-600",
                   ].join(" ")}
                 />
                 <span>{item.label}</span>
-              </button>
+              </Link>
             );
           })}
         </nav>
