@@ -1,68 +1,84 @@
-import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { ChevronRight, Target } from "lucide-react";
-import Link from "next/link";
-import { ChannelEmptyState } from "@/components/app/channel/ChannelEmptyState";
-import { ChannelProfileCard } from "@/components/app/channel/ChannelProfileCard";
-import { ChannelAiReadinessCard } from "@/components/app/channel/ChannelAiReadinessCard";
-import { ChannelProfileForm } from "@/components/app/channel/ChannelProfileForm";
+import { ChevronRight } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import ChannelAiReadinessCard from "@/components/app/channel/ChannelAiReadinessCard";
+import ChannelEmptyState from "@/components/app/channel/ChannelEmptyState";
+import ChannelProfileCard from "@/components/app/channel/ChannelProfileCard";
+import ChannelProfileForm from "@/components/app/channel/ChannelProfileForm";
+
+export type ChannelProfile = {
+  id: string;
+  user_id: string;
+  name: string | null;
+  platform: string | null;
+  niche: string | null;
+  goal: string | null;
+  target_audience: string | null;
+  content_style: string | null;
+  experience_level: string | null;
+  avatar_url: string | null;
+  tiktok_url: string | null;
+  youtube_url: string | null;
+  facebook_url: string | null;
+  channel_status: string | null;
+  current_situation: string | null;
+  desired_positioning: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+};
 
 export default async function ChannelPage() {
   const supabase = await createClient();
 
   const {
     data: { user },
+    error,
   } = await supabase.auth.getUser();
 
-  if (!user) {
+  if (error || !user) {
     redirect("/login");
   }
 
-  const { data: channel } = await supabase
+  const { data: channelData } = await supabase
     .from("channels")
     .select("*")
     .eq("user_id", user.id)
-    .single();
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const channel = channelData as ChannelProfile | null;
 
   return (
-    <div className="mx-auto max-w-[1280px] p-6 lg:p-8">
-      {/* Header */}
-      <div className="mb-8">
-        <nav className="mb-3 flex items-center gap-2 text-sm font-medium text-slate-500">
-          <Link href="/app" className="hover:text-slate-900">
-            Content Chốt Đơn
-          </Link>
-          <ChevronRight className="h-4 w-4" />
+    <div className="mx-auto w-full max-w-[1360px] space-y-6">
+      <header className="space-y-3">
+        <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-slate-500">
+          <span>Content Chốt Đơn</span>
+          <ChevronRight className="h-4 w-4 text-slate-400" />
           <span className="text-slate-900">Hồ sơ kênh</span>
-        </nav>
-        <div className="flex items-center gap-3">
-          <h1 className="text-3xl font-black tracking-tight text-slate-900">
+        </div>
+
+        <div>
+          <h1 className="text-3xl font-black tracking-[-0.04em] text-slate-950 sm:text-4xl">
             Hồ sơ kênh
           </h1>
+          <p className="mt-2 max-w-3xl text-base font-medium leading-7 text-slate-500">
+            Thiết lập thông tin kênh để AI hiểu rõ hơn và đưa ra gợi ý nội dung
+            phù hợp.
+          </p>
         </div>
-        <p className="mt-2 text-[15px] text-slate-600">
-          Thiết lập định vị kênh để AI tạo nội dung chính xác hơn.
-        </p>
-      </div>
+      </header>
 
-      {/* Main Layout */}
-      <div className="grid gap-6 lg:grid-cols-[42%_1fr] xl:gap-8">
-        {/* Left Column */}
-        <div className="flex flex-col gap-6">
-          {!channel ? (
-            <ChannelEmptyState />
-          ) : (
-            <>
-              <ChannelProfileCard channel={channel} />
-              <ChannelAiReadinessCard />
-            </>
-          )}
-        </div>
+      <div className="grid items-start gap-6 xl:grid-cols-[0.42fr_0.58fr]">
+        <section className="space-y-6">
+          <ChannelProfileCard channel={channel} />
+          <ChannelAiReadinessCard channel={channel} />
+          <ChannelEmptyState channel={channel} />
+        </section>
 
-        {/* Right Column */}
-        <div>
+        <section>
           <ChannelProfileForm channel={channel} />
-        </div>
+        </section>
       </div>
     </div>
   );

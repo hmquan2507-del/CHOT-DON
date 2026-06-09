@@ -1,142 +1,195 @@
-import { Channel } from "@/types/channel";
 import {
-  CheckCircle2,
-  Edit2,
-  Play,
-  Sparkles,
+  Camera,
+  ExternalLink,
+  Globe,
   Target,
-  TrendingUp,
+  UserRound,
   Users,
+  Video,
 } from "lucide-react";
+import type { ChannelProfile } from "@/app/app/channel/page";
 
-interface ChannelProfileCardProps {
-  channel: Channel;
+type ChannelProfileCardProps = {
+  channel: ChannelProfile | null;
+};
+
+function safeValue(value?: string | null, fallback = "Chưa cập nhật") {
+  return value?.trim() || fallback;
 }
 
-export function ChannelProfileCard({ channel }: ChannelProfileCardProps) {
-  const getInitials = (name: string) => {
-    if (!name) return "C";
+function getInitials(name?: string | null) {
+  const source = name?.trim() || "Content Chốt Đơn";
 
-    return name
-      .split(" ")
-      .filter(Boolean)
-      .map((item) => item[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase();
-  };
+  return source
+    .split(" ")
+    .map((item) => item[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
+
+function getStatusLabel(status?: string | null) {
+  if (status === "existing") {
+    return "Đã có kênh";
+  }
+
+  if (status === "rebuild") {
+    return "Muốn làm lại";
+  }
+
+  return "Chưa có kênh";
+}
+
+export default function ChannelProfileCard({
+  channel,
+}: ChannelProfileCardProps) {
+  const channelName = safeValue(channel?.name, "Kênh của bạn");
+  const description =
+    channel?.desired_positioning?.trim() ||
+    channel?.goal?.trim() ||
+    channel?.niche?.trim() ||
+    "Cập nhật định vị để AI hiểu rõ kênh của bạn hơn.";
+
+  const socialBadges = [
+    {
+      label: "TikTok",
+      url: channel?.tiktok_url,
+    },
+    {
+      label: "YouTube",
+      url: channel?.youtube_url,
+    },
+    {
+      label: "Facebook Reels",
+      url: channel?.facebook_url,
+    },
+  ];
+
+  const summaryItems = [
+    {
+      label: "Ngách",
+      value: safeValue(channel?.niche),
+      icon: Globe,
+    },
+    {
+      label: "Mục tiêu kênh",
+      value: safeValue(channel?.goal),
+      icon: Target,
+    },
+    {
+      label: "Tệp khách hàng",
+      value: safeValue(channel?.target_audience),
+      icon: Users,
+    },
+    {
+      label: "Phong cách nội dung",
+      value: safeValue(channel?.content_style),
+      icon: Video,
+    },
+    {
+      label: "Kinh nghiệm hiện tại",
+      value: safeValue(channel?.experience_level),
+      icon: UserRound,
+    },
+  ];
 
   return (
-    <div className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
-      <div className="h-28 bg-gradient-to-br from-emerald-400 via-teal-400 to-emerald-600" />
+    <section className="overflow-hidden rounded-[24px] border border-slate-200/80 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
+      <div className="relative h-[118px] overflow-hidden bg-[linear-gradient(135deg,#13B981_0%,#38D5B2_48%,#B7F6E2_100%)]">
+        <div className="absolute inset-0 opacity-35 [background-image:linear-gradient(135deg,rgba(255,255,255,0.55)_1px,transparent_1px)] [background-size:16px_16px]" />
+        <div className="absolute -right-12 -top-20 h-56 w-56 rounded-full border border-white/35" />
+        <div className="absolute -right-24 -top-28 h-72 w-72 rounded-full border border-white/25" />
+      </div>
 
       <div className="relative px-6 pb-6">
-        <div className="absolute -top-12 flex h-24 w-24 items-center justify-center rounded-full border-[6px] border-white bg-emerald-600 text-3xl font-black text-white shadow-sm">
-          {getInitials(channel.name)}
+        <div className="-mt-12 flex items-end justify-between gap-4">
+          <div className="relative h-24 w-24 shrink-0 rounded-[28px] border-4 border-white bg-emerald-50 shadow-lg">
+            {channel?.avatar_url ? (
+              <img
+                src={channel.avatar_url}
+                alt={channelName}
+                className="h-full w-full rounded-[24px] object-cover"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center rounded-[24px] text-3xl font-black text-emerald-700">
+                {getInitials(channelName)}
+              </div>
+            )}
+
+            <div className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-emerald-600 text-white shadow-md">
+              <Camera className="h-4 w-4" />
+            </div>
+          </div>
+
+          <div className="mb-1 text-center">
+            <div className="flex h-[78px] w-[78px] items-center justify-center rounded-full bg-white shadow-sm">
+              <div className="flex h-[62px] w-[62px] items-center justify-center rounded-full border-[7px] border-emerald-500 text-lg font-black text-slate-950">
+                92%
+              </div>
+            </div>
+            <p className="mt-2 text-[11px] font-bold text-slate-400">
+              Hoàn thiện hồ sơ
+            </p>
+          </div>
         </div>
 
-        <div className="ml-28 flex items-start justify-between pt-3">
-          <div>
-            <h3 className="text-xl font-bold text-slate-900">{channel.name}</h3>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <h2 className="text-2xl font-black tracking-[-0.04em] text-slate-950">
+            {channelName}
+          </h2>
 
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center rounded-lg border border-slate-100 bg-slate-50 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-slate-600">
-                {channel.platform}
-              </span>
-
-              <span className="flex items-center gap-1 rounded-lg bg-emerald-50/80 px-2.5 py-1 text-[12px] font-bold text-emerald-700">
-                <CheckCircle2 className="h-3.5 w-3.5" />
-                Đã thiết lập
-              </span>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-50 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
-            aria-label="Chỉnh sửa hồ sơ kênh"
-          >
-            <Edit2 className="h-4 w-4" />
-          </button>
+          <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-extrabold text-emerald-700">
+            {getStatusLabel(channel?.channel_status)}
+          </span>
         </div>
 
-        <div className="mt-8 flex flex-col gap-5 divide-y divide-slate-100">
-          <div className="flex gap-4 pt-0">
-            <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-50 text-slate-500">
-              <Target className="h-4.5 w-4.5" />
-            </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {socialBadges.map((item) => (
+            <span
+              key={item.label}
+              className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-600"
+            >
+              <ExternalLink className="h-3.5 w-3.5 text-emerald-600" />
+              {item.label}
+              {!item.url ? (
+                <span className="text-slate-400">· chưa liên kết</span>
+              ) : null}
+            </span>
+          ))}
+        </div>
 
-            <div className="flex-1">
-              <p className="text-[13px] font-medium text-slate-500">
-                Ngách (Niche)
-              </p>
-              <p className="mt-0.5 text-[15px] font-medium text-slate-900">
-                {channel.niche}
-              </p>
-            </div>
-          </div>
+        <p className="mt-4 max-w-xl text-sm font-medium leading-6 text-slate-500">
+          {description}
+        </p>
 
-          <div className="flex gap-4 pt-5">
-            <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-50 text-slate-500">
-              <TrendingUp className="h-4.5 w-4.5" />
-            </div>
+        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+          {summaryItems.map((item) => {
+            const Icon = item.icon;
 
-            <div className="flex-1">
-              <p className="text-[13px] font-medium text-slate-500">
-                Mục tiêu kênh
-              </p>
-              <p className="mt-0.5 text-[15px] font-medium text-slate-900">
-                {channel.goal}
-              </p>
-            </div>
-          </div>
+            return (
+              <div
+                key={item.label}
+                className="rounded-2xl border border-slate-100 bg-slate-50/70 p-4"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+                    <Icon className="h-5 w-5" />
+                  </div>
 
-          <div className="flex gap-4 pt-5">
-            <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-50 text-slate-500">
-              <Users className="h-4.5 w-4.5" />
-            </div>
-
-            <div className="flex-1">
-              <p className="text-[13px] font-medium text-slate-500">
-                Tệp khách hàng
-              </p>
-              <p className="mt-0.5 text-[15px] font-medium leading-relaxed text-slate-900">
-                {channel.target_audience || "Chưa cập nhật"}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex gap-4 pt-5">
-            <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-50 text-slate-500">
-              <Sparkles className="h-4.5 w-4.5" />
-            </div>
-
-            <div className="flex-1">
-              <p className="text-[13px] font-medium text-slate-500">
-                Phong cách nội dung
-              </p>
-              <p className="mt-0.5 text-[15px] font-medium leading-relaxed text-slate-900">
-                {channel.content_style || "Chưa cập nhật"}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex gap-4 pt-5">
-            <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-50 text-slate-500">
-              <Play className="h-4.5 w-4.5" />
-            </div>
-
-            <div className="flex-1">
-              <p className="text-[13px] font-medium text-slate-500">
-                Kinh nghiệm hiện tại
-              </p>
-              <p className="mt-0.5 text-[15px] font-medium text-slate-900">
-                {channel.experience_level || "Chưa cập nhật"}
-              </p>
-            </div>
-          </div>
+                  <div>
+                    <p className="text-xs font-extrabold text-slate-400">
+                      {item.label}
+                    </p>
+                    <p className="mt-1 text-sm font-black text-slate-950">
+                      {item.value}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
-    </div>
+    </section>
   );
 }

@@ -1,23 +1,29 @@
 "use client";
 
+import { CheckCircle2 } from "lucide-react";
 import { useFormStatus } from "react-dom";
-import { Loader2 } from "lucide-react";
 
-interface ChannelSubmitButtonProps {
-  mode: "create" | "update";
-}
+type ChannelSubmitButtonProps = {
+  hasChannel: boolean;
+};
 
-export function ChannelSubmitButton({ mode }: ChannelSubmitButtonProps) {
+export default function ChannelSubmitButton({
+  hasChannel,
+}: ChannelSubmitButtonProps) {
   const { pending } = useFormStatus();
 
   return (
     <button
       type="submit"
       disabled={pending}
-      className="flex h-[52px] w-full items-center justify-center rounded-2xl bg-emerald-600 px-6 text-[15px] font-bold text-white shadow-[0_4px_14px_rgba(16,185,129,0.25)] transition hover:bg-emerald-700 disabled:opacity-70"
+      className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-emerald-500 text-sm font-extrabold text-white shadow-[0_16px_36px_rgba(16,185,129,0.24)] transition hover:from-emerald-700 hover:to-emerald-600 disabled:cursor-not-allowed disabled:opacity-60"
     >
-      {pending && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
-      {mode === "create" ? "Lưu hồ sơ kênh" : "Cập nhật hồ sơ"}
+      <CheckCircle2 className="h-4 w-4" />
+      {pending
+        ? "Đang lưu..."
+        : hasChannel
+          ? "Cập nhật hồ sơ"
+          : "Lưu hồ sơ kênh"}
     </button>
   );
 }
