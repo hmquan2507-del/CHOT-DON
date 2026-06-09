@@ -1,11 +1,13 @@
 import type { LucideIcon } from "lucide-react";
 import { MoreVertical } from "lucide-react";
+import Link from "next/link";
 
 type DashboardStatCardProps = {
   title: string;
   value: string;
   description: string;
   cta: string;
+  href?: string;
   icon: LucideIcon;
   accent?: "emerald" | "blue" | "amber" | "purple";
   progress?: number;
@@ -40,6 +42,7 @@ export default function DashboardStatCard({
   value,
   description,
   cta,
+  href,
   icon: Icon,
   accent = "emerald",
   progress,
@@ -47,10 +50,20 @@ export default function DashboardStatCard({
 }: DashboardStatCardProps) {
   const styles = accentStyles[accent];
 
+  const CtaElement = href ? (
+    <Link href={href} className={`mt-5 inline-block text-[13px] font-black ${styles.cta}`}>
+      {cta} →
+    </Link>
+  ) : (
+    <button className={`mt-5 text-[13px] font-black ${styles.cta}`}>
+      {cta} →
+    </button>
+  );
+
   return (
     <article className="rounded-[24px] border border-[#DDEBE4] bg-white p-5 shadow-[0_16px_45px_rgba(15,23,42,0.06)]">
       <div className="flex items-start justify-between gap-4">
-        <div className={`flex h-10 w-10 items-center justify-center rounded-2xl ${styles.icon}`}>
+        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${styles.icon}`}>
           <Icon className="h-5 w-5" strokeWidth={2.3} />
         </div>
 
@@ -62,11 +75,11 @@ export default function DashboardStatCard({
       <div className="mt-5">
         <h3 className="text-[14px] font-black text-slate-700">{title}</h3>
 
-        <div className="mt-3 text-[32px] font-black leading-none tracking-[-0.05em] text-[#07111F]">
+        <div className="mt-3 truncate text-[32px] font-black leading-none tracking-[-0.05em] text-[#07111F]">
           {value}
         </div>
 
-        <p className="mt-3 text-[13px] font-medium leading-5 text-slate-500">
+        <p className="mt-3 text-[13px] font-medium leading-5 text-slate-500 line-clamp-2">
           {description}
         </p>
       </div>
@@ -99,9 +112,7 @@ export default function DashboardStatCard({
         </div>
       ) : null}
 
-      <button className={`mt-5 text-[13px] font-black ${styles.cta}`}>
-        {cta} →
-      </button>
+      {CtaElement}
     </article>
   );
 }

@@ -2,13 +2,28 @@ import {
   BarChart3,
   Box,
   CalendarDays,
-  ClipboardList,
+  MonitorPlay,
 } from "lucide-react";
 import DashboardPerformanceCard from "@/components/app/DashboardPerformanceCard";
 import DashboardPlanCard from "@/components/app/DashboardPlanCard";
 import DashboardStatCard from "@/components/app/DashboardStatCard";
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
-export default function AppDashboardPage() {
+export default async function AppDashboardPage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data: channel } = await supabase
+    .from("channels")
+    .select("*")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
   return (
     <div className="space-y-5">
       <section className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -24,47 +39,50 @@ export default function AppDashboardPage() {
 
       <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
         <DashboardStatCard
-          title="Kế hoạch 30 ngày"
-          value="18/30"
-          description="Nội dung đã lên kế hoạch"
-          cta="Xem chi tiết"
-          icon={ClipboardList}
+          title="Hồ sơ kênh"
+          value={channel ? "1" : "0"}
+          description={
+            channel
+              ? `${channel.name || "Chưa đặt tên kênh"} • ${channel.platform || "Chưa chọn nền tảng"} • ${channel.niche || "Chưa có ngách"} • ${channel.goal || "Chưa có mục tiêu"}`
+              : "Chưa kết nối kênh"
+          }
+          cta={channel ? "Thêm sản phẩm affiliate" : "Tạo hồ sơ kênh"}
+          href={channel ? undefined : "/app/channel"}
+          icon={MonitorPlay}
           accent="emerald"
-          progress={60}
         />
 
         <DashboardStatCard
-          title="Lịch đăng"
-          value="12"
-          description="Nội dung sắp đăng"
-          cta="Xem lịch"
+          title="Nội dung & Lịch đăng"
+          value="0"
+          description="Sẽ được cập nhật ở phase tiếp theo"
+          cta="Chưa có dữ liệu"
           icon={CalendarDays}
           accent="blue"
         />
 
         <DashboardStatCard
-          title="Hiệu suất nội dung"
-          value="342"
-          description="Tổng lượt hoạt động"
-          cta="Xem phân tích"
-          icon={BarChart3}
-          accent="amber"
-          chart={[34, 48, 62, 80, 68, 92, 74]}
+          title="Sản phẩm affiliate"
+          value="0"
+          description="Sẽ được cập nhật ở phase tiếp theo"
+          cta="Chưa có dữ liệu"
+          icon={Box}
+          accent="purple"
         />
 
         <DashboardStatCard
-          title="Sản phẩm affiliate"
-          value="23"
-          description="Sản phẩm đang hợp tác"
-          cta="Quản lý sản phẩm"
-          icon={Box}
-          accent="purple"
+          title="Hiệu suất nội dung"
+          value="0"
+          description="Sẽ được cập nhật ở phase tiếp theo"
+          cta="Chưa có dữ liệu"
+          icon={BarChart3}
+          accent="amber"
         />
       </section>
 
       <section className="grid gap-5 xl:grid-cols-[1fr_1fr]">
-        <DashboardPlanCard />
-        <DashboardPerformanceCard />
+        <DashboardPlanCard isEmpty={true} />
+        <DashboardPerformanceCard isEmpty={true} />
       </section>
     </div>
   );
