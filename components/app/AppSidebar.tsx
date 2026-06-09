@@ -21,11 +21,11 @@ import { logoutAction } from "@/app/(auth)/actions";
 const navItems = [
   { label: "Tổng quan", icon: Home, href: "/app" },
   { label: "Hồ sơ kênh", icon: UserCircle2, href: "/app/channel" },
-  { label: "Sản phẩm", icon: Box, href: "/app/product" },
-  { label: "Ý tưởng", icon: Lightbulb, href: "/app/idea" },
-  { label: "Kịch bản", icon: FileText, href: "/app/script" },
+  { label: "Sản phẩm", icon: Box, href: "/app/products" },
+  { label: "Ý tưởng", icon: Lightbulb, href: "/app/ideas" },
+  { label: "Kịch bản", icon: FileText, href: "/app/scripts" },
   { label: "Lịch nội dung", icon: CalendarDays, href: "/app/calendar" },
-  { label: "Phân tích", icon: BarChart3, href: "/app/analytics" },
+  { label: "Phân tích", icon: BarChart3, href: "/app/metrics" },
   { label: "Cài đặt", icon: Settings, href: "/app/settings" },
 ];
 
