@@ -160,7 +160,7 @@ export default async function ProductsPage() {
   const priorityProducts = getPriorityProducts(products);
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-[1440px] space-y-8 pb-10">
       <header className="space-y-3">
         <div className="flex flex-wrap items-center gap-2 text-sm font-medium text-slate-500">
           <span>Content Chốt Đơn</span>
@@ -172,6 +172,9 @@ export default async function ProductsPage() {
           <h1 className="text-3xl font-black tracking-[-0.04em] text-slate-950 sm:text-4xl">
             Thư viện sản phẩm
           </h1>
+          <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-extrabold text-emerald-700 shadow-sm">
+            Phase 4
+          </span>
         </div>
 
         <p className="max-w-3xl text-base font-medium leading-7 text-slate-500">
@@ -203,8 +206,8 @@ export default async function ProductsPage() {
         </div>
       ) : null}
 
-      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
-        <section className="min-w-0 space-y-6">
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_380px] 2xl:grid-cols-[minmax(0,1fr)_400px]">
+        <section className="min-w-0 space-y-8">
           <ProductStats stats={stats} />
 
           <ProductAnalytics

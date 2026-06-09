@@ -41,10 +41,10 @@ export default function AppSidebar() {
           </div>
 
           <div className="min-w-0">
-            <div className="truncate text-[16px] font-black leading-tight tracking-[-0.04em] text-[#07111F]">
+            <div className="text-[15px] font-black leading-tight tracking-[-0.02em] text-[#07111F]">
               Content <span className="text-[#059669]">Chốt Đơn</span>
             </div>
-            <div className="truncate text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-0.5">
+            <div className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
               AI Creator Workspace
             </div>
           </div>

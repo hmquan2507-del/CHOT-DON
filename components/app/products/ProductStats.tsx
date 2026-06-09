@@ -31,18 +31,29 @@ function formatCompactCurrency(value: number) {
   return formatCurrency(value);
 }
 
-function MiniSparkline() {
-  const heights = [12, 16, 15, 22, 18, 26, 20, 30];
+function MiniSparkline({ index }: { index: number }) {
+  const patterns = [
+    "M0,20 Q10,5 20,15 T40,5 T60,18",
+    "M0,15 Q15,25 30,10 T60,5",
+    "M0,5 Q15,20 30,5 T60,15",
+    "M0,25 Q15,5 30,20 T60,10",
+  ];
+  
+  const path = patterns[index % patterns.length];
 
   return (
-    <div className="flex h-9 items-end gap-1">
-      {heights.map((height, index) => (
-        <span
-          key={`${height}-${index}`}
-          className="w-2 rounded-full bg-emerald-400/70"
-          style={{ height }}
+    <div className="flex h-10 w-20 items-end justify-end opacity-60">
+      <svg viewBox="0 0 60 30" className="h-full w-full overflow-visible" preserveAspectRatio="none">
+        <path
+          d={path}
+          fill="none"
+          stroke="currentColor"
+          className="text-emerald-400"
+          strokeWidth="3.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         />
-      ))}
+      </svg>
     </div>
   );
 }
@@ -76,34 +87,36 @@ export default function ProductStats({ stats }: ProductStatsProps) {
   ];
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      {cards.map((card) => {
+    <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+      {cards.map((card, index) => {
         const Icon = card.icon;
 
         return (
           <div
             key={card.label}
-            className="rounded-[22px] border border-slate-200/80 bg-white p-5 shadow-[0_18px_45px_rgba(15,23,42,0.06)]"
+            className="flex flex-col rounded-[24px] border border-slate-200/60 bg-white p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)] transition hover:-translate-y-1 hover:shadow-[0_18px_50px_rgba(15,23,42,0.08)]"
           >
             <div className="flex items-start justify-between gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
-                <Icon className="h-6 w-6" />
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+                <Icon className="h-7 w-7" />
               </div>
 
-              <MiniSparkline />
+              <MiniSparkline index={index} />
             </div>
 
-            <p className="mt-4 text-sm font-bold text-slate-500">
+            <p className="mt-5 text-sm font-bold text-slate-500">
               {card.label}
             </p>
 
-            <p className="mt-1 text-3xl font-black tracking-[-0.04em] text-slate-950">
+            <p className="mt-1 text-3xl font-black tracking-[-0.04em] text-slate-950 sm:text-4xl">
               {card.value}
             </p>
 
-            <p className="mt-2 text-xs font-semibold text-emerald-600">
-              {card.helper}
-            </p>
+            <div className="mt-auto pt-3">
+              <p className="text-xs font-bold text-emerald-600 bg-emerald-50 inline-block px-2.5 py-1 rounded-full">
+                {card.helper}
+              </p>
+            </div>
           </div>
         );
       })}

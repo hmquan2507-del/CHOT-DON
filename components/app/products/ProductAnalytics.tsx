@@ -26,19 +26,19 @@ export default function ProductAnalytics({
 }: ProductAnalyticsProps) {
   if (products.length === 0) {
     return (
-      <section className="rounded-[24px] border border-slate-200/80 bg-white p-8 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
-        <div className="flex flex-col items-center justify-center py-8 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
-            <BarChart3 className="h-7 w-7" />
+      <section className="rounded-[24px] border border-slate-200/60 bg-white p-8 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
+        <div className="flex flex-col items-center justify-center py-10 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+            <BarChart3 className="h-8 w-8" />
           </div>
 
-          <h2 className="mt-4 text-xl font-black text-slate-950">
+          <h2 className="mt-5 text-xl font-black text-slate-950">
             Chưa có dữ liệu phân tích
           </h2>
 
           <p className="mt-2 max-w-md text-sm font-medium leading-6 text-slate-500">
-            Thêm sản phẩm để xem phân tích theo ngách và top sản phẩm theo hoa
-            hồng.
+            Thêm sản phẩm để hệ thống tự động tổng hợp và phân tích theo ngách,
+            cũng như gợi ý các sản phẩm tiềm năng nhất.
           </p>
         </div>
       </section>
@@ -50,13 +50,34 @@ export default function ProductAnalytics({
     1,
   );
 
+  let cumulativePercent = 0;
+  const colors = ["#10b981", "#34d399", "#6ee7b7", "#a7f3d0", "#d1fae5", "#ecfdf5"];
+  
+  const gradients = categoryDistribution.map((item, i) => {
+    const color = colors[i % colors.length];
+    const start = cumulativePercent;
+    const end = cumulativePercent + item.percent;
+    cumulativePercent = end;
+    // For a single category, we want a full circle
+    if (categoryDistribution.length === 1) {
+       return `${color} 0% 100%`;
+    }
+    return `${color} ${start}% ${end}%`;
+  });
+  
+  const conicStyle = {
+    background: categoryDistribution.length > 0 
+      ? `conic-gradient(${gradients.join(", ")})` 
+      : "#f1f5f9"
+  };
+
   return (
-    <section className="rounded-[24px] border border-slate-200/80 bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
-      <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
-        <div>
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
-              <PieChart className="h-5 w-5" />
+    <section className="rounded-[24px] border border-slate-200/60 bg-white p-6 sm:p-8 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
+      <div className="grid gap-10 lg:grid-cols-2">
+        <div className="flex flex-col">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+              <PieChart className="h-6 w-6" />
             </div>
 
             <div>
@@ -64,55 +85,63 @@ export default function ProductAnalytics({
                 Phân bổ theo ngách
               </h2>
               <p className="text-sm font-medium text-slate-500">
-                Nhóm sản phẩm theo category
+                Tỷ trọng danh mục sản phẩm
               </p>
             </div>
           </div>
 
-          <div className="mt-6 space-y-4">
-            {categoryDistribution.map((item) => (
-              <div key={item.category}>
-                <div className="flex items-center justify-between gap-4">
-                  <p className="text-sm font-bold text-slate-700">
-                    {item.category}
-                  </p>
-                  <p className="text-sm font-black text-slate-950">
-                    {item.percent}%
-                  </p>
-                </div>
-
-                <div className="mt-2 h-3 rounded-full bg-slate-100">
-                  <div
-                    className="h-3 rounded-full bg-emerald-500"
-                    style={{ width: `${item.percent}%` }}
-                  />
-                </div>
+          <div className="flex flex-col sm:flex-row items-center gap-8 flex-1 justify-center">
+            <div className="relative flex h-[160px] w-[160px] shrink-0 items-center justify-center rounded-full shadow-sm" style={conicStyle}>
+              <div className="h-[100px] w-[100px] rounded-full bg-white flex flex-col items-center justify-center shadow-inner">
+                <span className="text-2xl font-black text-slate-900">{products.length}</span>
+                <span className="text-[10px] font-bold uppercase text-slate-400">Total</span>
               </div>
-            ))}
+            </div>
+
+            <div className="flex w-full flex-col gap-3">
+              {categoryDistribution.map((item, index) => (
+                <div key={item.category} className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <span 
+                      className="h-3 w-3 rounded-full" 
+                      style={{ backgroundColor: colors[index % colors.length] }}
+                    />
+                    <span className="text-sm font-bold text-slate-700">
+                      {item.category}
+                    </span>
+                  </div>
+                  <span className="text-sm font-black text-slate-950">
+                    {item.percent}%
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
-        <div className="border-t border-slate-100 pt-8 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
-              <BarChart3 className="h-5 w-5" />
+        <div className="border-t border-slate-100 pt-10 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+              <BarChart3 className="h-6 w-6" />
             </div>
 
             <div>
               <h2 className="text-lg font-black text-slate-950">
-                Sản phẩm tiềm năng theo hoa hồng
+                Sản phẩm tiềm năng nhất
               </h2>
               <p className="text-sm font-medium text-slate-500">
-                Top 5 sản phẩm có % hoa hồng cao nhất
+                Top 5 sản phẩm theo hoa hồng
               </p>
             </div>
           </div>
 
-          <div className="mt-6 space-y-4">
+          <div className="flex flex-col justify-center flex-1 space-y-5">
             {topCommissionProducts.length === 0 ? (
-              <p className="rounded-2xl bg-slate-50 p-5 text-sm font-medium text-slate-500">
-                Chưa có sản phẩm nào có hoa hồng.
-              </p>
+              <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center">
+                <p className="text-sm font-bold text-slate-600">
+                  Chưa có sản phẩm nào có tỷ lệ hoa hồng.
+                </p>
+              </div>
             ) : (
               topCommissionProducts.map((product) => {
                 const commission = toNumber(product.commission);
@@ -120,7 +149,7 @@ export default function ProductAnalytics({
 
                 return (
                   <div key={product.id}>
-                    <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center justify-between gap-4 mb-2">
                       <p className="line-clamp-1 text-sm font-bold text-slate-700">
                         {product.name}
                       </p>
@@ -129,9 +158,9 @@ export default function ProductAnalytics({
                       </p>
                     </div>
 
-                    <div className="mt-2 h-4 rounded-full bg-slate-100">
+                    <div className="h-3.5 rounded-full bg-slate-100 overflow-hidden">
                       <div
-                        className="h-4 rounded-full bg-gradient-to-r from-emerald-400 to-emerald-600"
+                        className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-emerald-600 shadow-sm"
                         style={{ width: `${width}%` }}
                       />
                     </div>
