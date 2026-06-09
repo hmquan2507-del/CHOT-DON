@@ -7,8 +7,10 @@ interface ChannelProfileCardProps {
 
 export function ChannelProfileCard({ channel }: ChannelProfileCardProps) {
   const getInitials = (name: string) => {
+    if (!name) return "C";
     return name
       .split(" ")
+      .filter(Boolean)
       .map((n) => n[0])
       .slice(0, 2)
       .join("")

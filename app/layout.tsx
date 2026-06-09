@@ -9,9 +9,26 @@ const beVietnamPro = Be_Vietnam_Pro({
 });
 
 export const metadata: Metadata = {
-  title: "Content Chốt Đơn",
+  title: "Content Chốt Đơn — AI Content Planner cho bán hàng & affiliate",
   description:
-    "AI Content Planner giúp người mới xây kênh bán hàng, affiliate và thương hiệu cá nhân.",
+    "Tạo hồ sơ kênh, quản lý sản phẩm, lên kế hoạch nội dung 30 ngày, viết script và theo dõi hiệu suất nội dung bán hàng.",
+  applicationName: "Content Chốt Đơn",
+  keywords: [
+    "Content Chốt Đơn",
+    "AI content planner",
+    "TikTok affiliate",
+    "YouTube Shorts",
+    "Facebook Reels",
+    "kịch bản video ngắn",
+    "lập kế hoạch nội dung",
+  ],
+  openGraph: {
+    title: "Content Chốt Đơn — AI Content Planner cho bán hàng & affiliate",
+    description:
+      "Tạo hồ sơ kênh, quản lý sản phẩm, lên kế hoạch nội dung 30 ngày, viết script và theo dõi hiệu suất nội dung bán hàng.",
+    siteName: "Content Chốt Đơn",
+    type: "website",
+  },
 };
 
 export default function RootLayout({

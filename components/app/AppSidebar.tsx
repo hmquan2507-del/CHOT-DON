@@ -36,16 +36,16 @@ export default function AppSidebar() {
     <aside className="sticky top-0 hidden h-screen w-[240px] shrink-0 border-r border-[#DDEBE2] bg-white/80 backdrop-blur-xl lg:block">
       <div className="flex h-full flex-col px-6">
         <div className="flex h-[84px] items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#059669] text-white shadow-lg shadow-emerald-600/20">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#059669] text-white shadow-lg shadow-emerald-600/20">
             <Sparkles className="h-5 w-5" strokeWidth={2.4} />
           </div>
 
-          <div>
-            <div className="text-[17px] font-black tracking-[-0.04em] text-[#07111F]">
-              Content
+          <div className="min-w-0">
+            <div className="truncate text-[16px] font-black leading-tight tracking-[-0.04em] text-[#07111F]">
+              Content <span className="text-[#059669]">Chốt Đơn</span>
             </div>
-            <div className="-mt-1 text-[17px] font-black tracking-[-0.04em] text-[#059669]">
-              Chốt Đơn
+            <div className="truncate text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-0.5">
+              AI Creator Workspace
             </div>
           </div>
         </div>

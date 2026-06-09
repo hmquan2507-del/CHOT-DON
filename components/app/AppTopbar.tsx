@@ -23,6 +23,10 @@ export default function AppTopbar({
 }: {
   currentUser: CurrentUserForTopbar;
 }) {
+  const displayName = currentUser.displayName || currentUser.email?.split("@")[0] || "Creator";
+  const initials = currentUser.initials || displayName.charAt(0).toUpperCase();
+  const plan = currentUser.plan || "Free";
+
   return (
     <header className="sticky top-0 z-40 border-b border-[#DDEBE4]/80 bg-[#F7FAF4]/82 backdrop-blur-2xl">
       <div className="mx-auto flex h-[84px] w-full max-w-[1680px] items-center gap-4 px-4 sm:px-5 lg:px-6 xl:px-7">
@@ -62,25 +66,25 @@ export default function AppTopbar({
             <DropdownMenuTrigger asChild>
               <button className="hidden h-12 items-center gap-3 rounded-[18px] border border-[#DDEBE4] bg-white/95 px-3 pr-4 shadow-[0_10px_28px_rgba(15,23,42,0.035)] transition hover:bg-white sm:flex outline-none">
                 {currentUser.avatarUrl ? (
-                  <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-slate-200">
+                  <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-white">
                     <img
                       src={currentUser.avatarUrl}
-                      alt={currentUser.displayName}
+                      alt={displayName}
                       className="h-full w-full object-cover"
                     />
                   </div>
                 ) : (
-                  <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-emerald-100 to-amber-100 text-[15px] font-black text-emerald-700">
-                    {currentUser.initials}
+                  <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-emerald-100 text-[15px] font-black text-emerald-700">
+                    {initials}
                   </div>
                 )}
 
                 <div className="hidden text-left xl:block">
                   <div className="text-[14px] font-black leading-5 text-[#07111F]">
-                    {currentUser.displayName}
+                    {displayName}
                   </div>
                   <div className="text-[12px] font-medium text-slate-500 capitalize">
-                    {currentUser.plan} Plan
+                    {plan} Plan
                   </div>
                 </div>
 
@@ -90,9 +94,9 @@ export default function AppTopbar({
             <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2">
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{currentUser.displayName}</p>
+                  <p className="text-sm font-medium leading-none">{displayName}</p>
                   <p className="text-xs leading-none text-slate-500">
-                    {currentUser.email}
+                    {currentUser.email || "No email"}
                   </p>
                 </div>
               </DropdownMenuLabel>

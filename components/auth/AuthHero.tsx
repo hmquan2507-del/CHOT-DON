@@ -92,12 +92,12 @@ export default function AuthHero({ variant }: AuthHeroProps) {
           href="/"
           className="inline-flex w-fit cursor-pointer items-center gap-4 rounded-2xl transition hover:opacity-90"
         >
-          <div className="flex h-12 w-12 items-center justify-center rounded-[14px] bg-[#0FA968] text-white shadow-[0_16px_34px_rgba(14,169,104,0.24)]">
+          <div className="flex h-12 w-12 items-center justify-center rounded-[14px] bg-[#0EA968] text-white shadow-[0_16px_34px_rgba(14,169,104,0.24)]">
             <Sparkles className="h-5 w-5" strokeWidth={2.7} />
           </div>
 
           <span className="text-[20px] font-extrabold tracking-[-0.035em] text-[#091224]">
-            Content Chốt Đơn
+            Content <span className="text-[#0EA968]">Chốt Đơn</span>
           </span>
         </Link>
 

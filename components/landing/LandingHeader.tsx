@@ -18,7 +18,7 @@ export default function LandingHeader() {
           </span>
 
           <span className="text-[1.1rem] font-black tracking-[-0.04em] text-[#07111F]">
-            Content Chốt Đơn
+            Content <span className="text-emerald-600">Chốt Đơn</span>
           </span>
         </a>
 
