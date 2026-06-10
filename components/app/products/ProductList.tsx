@@ -2,11 +2,19 @@ import type { Product } from "@/types/product";
 import { Grid2X2, ListFilter, Search, PackagePlus } from "lucide-react";
 import ProductCard from "./ProductCard";
 
-type ProductListProps = {
-  products: Product[];
+type ChannelSummary = {
+  id: string;
+  name: string;
+  platform: string | null;
+  niche: string | null;
 };
 
-export default function ProductList({ products }: ProductListProps) {
+type ProductListProps = {
+  products: Product[];
+  channel: ChannelSummary | null;
+};
+
+export default function ProductList({ products, channel }: ProductListProps) {
   return (
     <section className="rounded-[24px] border border-slate-200/60 bg-white p-6 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
       <div className="flex flex-col gap-4 border-b border-slate-100 pb-5 xl:flex-row xl:items-center xl:justify-between">
@@ -54,7 +62,7 @@ export default function ProductList({ products }: ProductListProps) {
 
       <div className="mt-6 grid gap-5 md:grid-cols-2 2xl:grid-cols-3">
         {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <ProductCard key={product.id} product={product} channel={channel} />
         ))}
         
         {products.length === 1 && (

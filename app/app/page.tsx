@@ -24,6 +24,13 @@ export default async function AppDashboardPage() {
     .eq("user_id", user.id)
     .maybeSingle();
 
+  const { count: productCount } = await supabase
+    .from("products")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id);
+
+  const productCountValue = productCount ?? 0;
+
   return (
     <div className="space-y-5">
       <section className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -63,9 +70,14 @@ export default async function AppDashboardPage() {
 
         <DashboardStatCard
           title="Sản phẩm affiliate"
-          value="0"
-          description="Sẽ được cập nhật ở phase tiếp theo"
-          cta="Chưa có dữ liệu"
+          value={productCountValue.toString()}
+          description={
+            productCountValue > 0
+              ? "Sản phẩm đã lưu"
+              : "Chưa có sản phẩm"
+          }
+          cta={productCountValue > 0 ? "Quản lý sản phẩm" : "Thêm sản phẩm"}
+          href="/app/products"
           icon={Box}
           accent="purple"
         />

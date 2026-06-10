@@ -1,8 +1,35 @@
+"use client";
+
+import { useState } from "react";
 import type { Product } from "@/types/product";
-import { ExternalLink, Pencil, Star, Trash2, Package } from "lucide-react";
+import {
+  ExternalLink,
+  Pencil,
+  Star,
+  Trash2,
+  Package,
+  X,
+} from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import ProductForm from "./ProductForm";
+import ProductDeleteDialog from "./ProductDeleteDialog";
+
+type ChannelSummary = {
+  id: string;
+  name: string;
+  platform: string | null;
+  niche: string | null;
+};
 
 type ProductCardProps = {
   product: Product;
+  channel: ChannelSummary | null;
 };
 
 function toNumber(value: number | string | null | undefined) {
@@ -41,7 +68,9 @@ function getInitials(name: string) {
   return name.substring(0, 2).toUpperCase();
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, channel }: ProductCardProps) {
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const strengths = splitTextToBullets(product.strengths);
   const commission = toNumber(product.commission);
 
@@ -145,25 +174,72 @@ export default function ProductCard({ product }: ProductCardProps) {
         )}
 
         <div className="mt-auto pt-5 flex items-center justify-end gap-2 border-t border-slate-100">
-          <button
-            type="button"
-            disabled
-            className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
-            title="Chỉnh sửa (Sắp ra mắt)"
-          >
-            <Pencil className="h-4 w-4" />
-          </button>
+          <Sheet open={editOpen} onOpenChange={setEditOpen}>
+            <SheetTrigger asChild>
+              <button
+                type="button"
+                className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-emerald-600 transition"
+                title="Chỉnh sửa sản phẩm"
+              >
+                <Pencil className="h-4 w-4" />
+              </button>
+            </SheetTrigger>
+
+            <SheetContent
+              side="right"
+              showCloseButton={false}
+              className="w-full border-slate-200/80 bg-white p-0 shadow-[0_18px_50px_rgba(15,23,42,0.1)] sm:max-w-xl"
+            >
+              <SheetHeader className="flex flex-row items-center justify-between border-b border-slate-100 px-6 py-5">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 shadow-sm border border-emerald-100/50">
+                    <Pencil className="h-6 w-6" />
+                  </div>
+
+                  <div>
+                    <SheetTitle className="text-[19px] font-black tracking-[-0.02em] text-slate-950">
+                      Chỉnh sửa sản phẩm
+                    </SheetTitle>
+                    <p className="mt-0.5 text-[13px] font-medium text-slate-500">
+                      Cập nhật thông tin sản phẩm
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setEditOpen(false)}
+                  className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </SheetHeader>
+
+              <div className="overflow-y-auto px-6 py-6">
+                <ProductForm
+                  channel={channel}
+                  product={product}
+                />
+              </div>
+            </SheetContent>
+          </Sheet>
 
           <button
             type="button"
-            disabled
+            onClick={() => setDeleteOpen(true)}
             className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-50/50 text-red-300 hover:bg-red-50 hover:text-red-500 transition"
-            title="Xóa (Sắp ra mắt)"
+            title="Xóa sản phẩm"
           >
             <Trash2 className="h-4 w-4" />
           </button>
         </div>
       </div>
+
+      <ProductDeleteDialog
+        product={product}
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+      />
     </article>
   );
 }

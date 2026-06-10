@@ -216,7 +216,7 @@ export default async function ProductsPage() {
           {products.length === 0 ? (
             <ProductEmptyState />
           ) : (
-            <ProductList products={products} />
+            <ProductList products={products} channel={channel} />
           )}
         </section>
 
