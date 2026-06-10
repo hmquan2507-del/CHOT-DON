@@ -2,251 +2,257 @@
 
 ## Current Phase
 
-Phase 4.4A — Smart Product Import MVP
+Phase 4.4B — Product Link Metadata Extract
 
 ## Goal
 
-Add a safe "Import product by link" flow to Product Library.
+Upgrade Smart Product Import so the app can extract basic metadata from a pasted product/affiliate URL.
 
-The user should be able to paste a product or affiliate link, add optional notes, and open a product form with the link and notes prefilled.
+The user should be able to paste a link, click a button, and the server will try to extract:
 
-This phase is only the foundation. It does not scrape Shopee/TikTok Shop yet. It does not call AI yet.
+- title
+- description
+- image URL
+- source domain
 
-## Product Flow
+If metadata is found, prefill the ProductForm with:
+
+- name = extracted title
+- notes = extracted description or user notes
+- affiliate_url = pasted URL
+
+If metadata fails, the flow must still work like Phase 4.4A.
+
+## Current Existing Flow
+
+Phase 4.4A already works:
+
+1. User pastes a product/affiliate URL.
+2. User adds optional notes.
+3. User opens a Sheet.
+4. ProductForm is prefilled with affiliate_url and notes.
+5. User fills remaining fields and saves product to Supabase.
+
+Do not break this existing flow.
+
+## New Flow for Phase 4.4B
 
 1. User goes to `/app/products`.
-2. User sees a professional card/section named `Nhập sản phẩm bằng link`.
-3. User pastes a product or affiliate URL.
-4. User can add optional notes.
-5. User clicks a button like `Tạo bản nháp sản phẩm`.
-6. The app opens a Sheet with `ProductForm`.
-7. `ProductForm` is in create mode.
-8. The form is prefilled with:
+2. User sees `Nhập sản phẩm bằng link`.
+3. User pastes a product/affiliate URL.
+4. User optionally adds notes.
+5. User clicks `Lấy thông tin sản phẩm` or `Tạo bản nháp sản phẩm`.
+6. Server-side action attempts to extract metadata from the URL.
+7. If successful:
+   - name is prefilled from metadata title.
+   - notes is prefilled from metadata description plus optional user notes.
+   - affiliate_url is prefilled with pasted URL.
 
-   * `affiliate_url` = pasted link
-   * `notes` = optional notes
-9. User manually fills the remaining required fields:
+8. If failed:
+   - affiliate_url is still prefilled.
+   - notes uses user notes.
+   - UI shows a subtle warning/helper text.
 
-   * name
-   * price
-   * category
-   * commission if needed
-   * strengths
-   * target_customer
-10. User saves the product.
-11. Product is saved into Supabase `products`.
-12. Existing add/edit/delete product flows must still work.
+9. User reviews and saves final product into `products`.
+
+## Important Product Rule
+
+Metadata is only a helper.
+
+The final confirmed product data must still be saved to the existing `products` table after user confirmation.
+
+Do not directly create a product from metadata without user review.
 
 ## Database
 
-A new table `product_imports` may be used to store import attempts.
+Use existing `product_imports` table if available.
 
-Purpose:
+Expected useful fields:
 
-* Store pasted links.
-* Store optional user notes.
-* Track import status.
-* Prepare for future metadata extraction and scraping phases.
+- user_id
+- channel_id
+- source_url
+- source_domain
+- status
+- raw_title
+- raw_description
+- raw_image_url
+- raw_metadata
+- user_notes
+- error_message
+- created_product_id
 
-Important:
+For Phase 4.4B:
 
-* `products` remains the final confirmed product table.
-* `product_imports` is only for import drafts/history.
-* Do not replace the existing `products` table.
+- Create an import record when user attempts metadata extraction.
+- Store extracted metadata if available.
+- Store error_message if metadata extraction fails.
+- Do not block the user if extraction fails.
 
-## Product Imports Table
+## Status Values
 
-Expected table:
+Use these statuses:
 
-* id
-* user_id
-* channel_id
-* source_url
-* source_domain
-* status
-* raw_title
-* raw_description
-* raw_image_url
-* raw_price
-* raw_currency
-* raw_metadata
-* user_notes
-* error_message
-* created_product_id
-* created_at
-* updated_at
-
-For Phase 4.4A, only these fields are required in the UI/action:
-
-* source_url
-* source_domain
-* user_notes
-* status
-* created_product_id if product is saved successfully
-
-## Scope
-
-Implement only Phase 4.4A:
-
-* Import by link UI
-* Save product import draft if needed
-* Open ProductForm with default values
-* Save final product into existing `products` table
+- pending: extraction started
+- succeeded: metadata extracted
+- failed: extraction failed
+- needs_review: partial metadata found
+- converted: user saved final product
 
 ## Not In Scope
 
 Do not implement:
 
-* Shopee scraping
-* TikTok Shop scraping
-* Browser automation
-* Playwright
-* Puppeteer
-* Proxy scraping
-* CAPTCHA bypass
-* Metadata extraction
-* AI enrichment
-* Image generation
-* Video generation
-* BYOK API key
-* Billing/credits
-* Database changes outside `product_imports`
+- Shopee/TikTok Shop deep scraping
+- Browser automation
+- Playwright
+- Puppeteer
+- Proxy scraping
+- CAPTCHA bypass
+- AI enrichment
+- Gemini/OpenAI API
+- Image generation
+- Video generation
+- BYOK
+- Billing/credits
+- New database schema beyond existing `product_imports`
 
 ## Allowed Files
 
 You may modify:
 
-* app/app/products/page.tsx
-* components/app/products/*
-* actions/products.ts only if needed
-* types/product.ts only if needed
+- app/app/products/page.tsx
+- components/app/products/ProductImportCard.tsx
+- components/app/products/ProductForm.tsx only if needed
+- actions/product-imports.ts
+- types/product-import.ts
+- lib/product-import/\*
+- types/product.ts only if absolutely needed
 
 You may create:
 
-* actions/product-imports.ts
-* types/product-import.ts
-* components/app/products/ProductImportCard.tsx
-* components/app/products/ProductImportSheet.tsx if needed
+- actions/product-imports.ts
+- types/product-import.ts
+- lib/product-import/extract-metadata.ts
+- lib/product-import/url.ts
 
 ## Forbidden Files
 
 Do not modify:
 
-* app/page.tsx
-* components/landing/*
-* app/(auth)/*
-* components/auth/*
-* app/app/channel/*
-* actions/channels.ts
-* lib/supabase/*
-* database schema except the approved `product_imports` table
-* package.json unless absolutely required
+- app/page.tsx
+- components/landing/\*
+- app/(auth)/\*
+- components/auth/\*
+- app/app/channel/\*
+- actions/channels.ts
+- lib/supabase/\*
+- database schema
+- package.json unless absolutely required
 
-## UI Requirements
+## Metadata Extraction Requirements
 
-The UI must be professional and match the current Product Library style.
+Create a server-side metadata extraction utility.
 
-Add a section/card:
+It should:
 
-Title:
-`Nhập sản phẩm bằng link`
+1. Validate URL.
+2. Normalize URL.
+3. Detect source domain.
+4. Fetch the page server-side.
+5. Parse basic metadata from returned HTML:
+   - og:title
+   - og:description
+   - og:image
+   - twitter:title
+   - twitter:description
+   - twitter:image
+   - title
+   - meta name="description"
 
-Subtitle:
-`Dán link sản phẩm hoặc link affiliate để tạo nhanh bản nháp sản phẩm.`
+6. Return a clean result object.
 
-Fields:
-
-* Product URL
-
-  * placeholder: `https://...`
-* Notes
-
-  * placeholder: `Ghi chú nhanh về sản phẩm, ưu điểm hoặc tệp khách hàng nếu có...`
-
-Buttons:
-
-* Primary: `Tạo bản nháp sản phẩm`
-* Secondary or helper: `Bạn có thể chỉnh lại toàn bộ thông tin trước khi lưu.`
-
-After clicking primary:
-
-* Open a Sheet.
-* Show ProductForm in create mode.
-* Prefill affiliate_url and notes.
-* Keep all other fields editable.
-
-## ProductForm Requirements
-
-ProductForm must support:
-
-1. Create mode without default values.
-2. Create mode with default values from import.
-3. Edit mode from Phase 4.3.
-
-Do not break existing behavior.
-
-Suggested prop:
+Suggested result type:
 
 ```ts
-type ProductFormDefaultValues = {
-  affiliate_url?: string;
-  notes?: string;
-  name?: string;
-  price?: string | number;
-  commission?: string | number;
-  category?: string;
-  strengths?: string;
-  target_customer?: string;
-};
-
-type ProductFormProps = {
-  channel?: Channel | null;
-  product?: Product;
-  defaultValues?: ProductFormDefaultValues;
+export type ProductMetadataResult = {
+  sourceUrl: string;
+  sourceDomain: string | null;
+  title: string | null;
+  description: string | null;
+  imageUrl: string | null;
+  rawMetadata: Record<string, string>;
 };
 ```
 
-If `product` exists, the form is edit mode.
+## Fallback Rule
 
-If `product` does not exist but `defaultValues` exists, the form is create mode with prefilled values.
+If metadata extraction fails, do not break the import flow.
 
-## Server Actions
+Fallback values:
 
-If creating `actions/product-imports.ts`, include:
+- affiliate_url = pasted URL
+- notes = user notes
+- name = empty
 
-* createProductImport
-* markProductImportConverted if needed
+Show helper message:
 
-Rules:
+`Không lấy được thông tin tự động. Bạn vẫn có thể nhập thủ công và lưu sản phẩm.`
 
-* Must get current authenticated user.
-* Must insert only for current user.
-* Must not trust client user_id.
-* Must revalidate `/app/products`.
-* Must keep TypeScript clean.
+## UI Requirements
+
+ProductImportCard should remain clean and professional.
+
+Add loading state:
+
+- Button text while extracting: `Đang lấy thông tin...`
+
+Add success state:
+
+- `Đã lấy được thông tin cơ bản. Vui lòng kiểm tra trước khi lưu.`
+
+Add fallback state:
+
+- `Không lấy được thông tin tự động. Bạn vẫn có thể nhập thủ công.`
+
+Keep current Product Library layout.
+
+Do not redesign the whole page.
+
+## ProductForm Requirements
+
+ProductForm must still support:
+
+1. Normal create mode.
+2. Create mode with defaultValues from import.
+3. Edit mode from Phase 4.3.
+
+Priority rule:
+
+- If product exists, use product values.
+- Else if defaultValues exists, use defaultValues.
+- Else empty create form.
+
+Do not break existing add/edit/delete flows.
 
 ## Technical Rules
 
-* Do not use localStorage.
-* Do not call third-party APIs from client components.
-* Do not call AI APIs in this phase.
-* Do not scrape external websites in this phase.
-* Real product data must be stored in Supabase.
-* Keep TypeScript clean.
-* Keep mobile responsive.
-* Keep current Product Library add/edit/delete flows working.
-* Run `npm run build` after changes.
+- Do not use localStorage.
+- Do not call third-party APIs from client components.
+- Metadata fetch must run server-side.
+- Do not call AI APIs in this phase.
+- Do not scrape with Playwright/Puppeteer.
+- Keep TypeScript clean.
+- Keep mobile responsive.
+- Run `npm run build` after changes.
 
 ## Success Criteria
 
-* `/app/products` shows an import-by-link card.
-* User can paste a link.
-* User can add notes.
-* User can open a product creation Sheet.
-* `affiliate_url` is prefilled.
-* `notes` is prefilled.
-* User can save final product to Supabase.
-* Existing add product form still works.
-* Existing edit product flow still works.
-* Existing delete product flow still works.
-* Build passes with `npm run build`.
+- User can paste a URL.
+- Server attempts metadata extraction.
+- If metadata is found, ProductForm opens with name/notes/affiliate_url prefilled.
+- If metadata fails, ProductForm still opens with affiliate_url/notes.
+- Existing add product flow still works.
+- Existing edit product flow still works.
+- Existing delete product flow still works.
+- `npm run build` passes.

@@ -1,10 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import { ExternalLink, FileText, X, CheckCircle2 } from "lucide-react";
+import { useState, useCallback } from "react";
+import {
+  ExternalLink,
+  FileText,
+  X,
+  CheckCircle2,
+  Loader2,
+  AlertCircle,
+} from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import ProductForm from "./ProductForm";
 import type { ProductFormDefaultValues } from "./ProductForm";
+import { extractProductMetadata } from "@/actions/product-imports";
+import type { ExtractProductMetadataResult } from "@/actions/product-imports";
 
 type ChannelSummary = {
   id: string;
@@ -15,6 +24,11 @@ type ChannelSummary = {
 
 type ProductImportCardProps = {
   channel: ChannelSummary | null;
+};
+
+type ExtractionMessage = {
+  text: string;
+  type: "success" | "info";
 };
 
 const inputClassName =
@@ -28,28 +42,78 @@ export default function ProductImportCard({ channel }: ProductImportCardProps) {
   const [notes, setNotes] = useState("");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [error, setError] = useState("");
+  const [isExtracting, setIsExtracting] = useState(false);
+  const [extractionMessage, setExtractionMessage] = useState<ExtractionMessage | null>(null);
+  const [extractedDefaults, setExtractedDefaults] = useState<ProductFormDefaultValues | null>(null);
 
-  function handleOpenSheet() {
+  const handleExtract = useCallback(async () => {
+    // Reset states
+    setError("");
+    setExtractionMessage(null);
+    setExtractedDefaults(null);
+
+    // Validate URL client-side
     if (!url.trim()) {
       setError("Vui lòng nhập link sản phẩm.");
       return;
     }
 
-    setError("");
-    setSheetOpen(true);
-  }
+    setIsExtracting(true);
+
+    try {
+      const result: ExtractProductMetadataResult = await extractProductMetadata(
+        url.trim(),
+        notes.trim(),
+      );
+
+      // Set extraction message
+      if (result.success) {
+        setExtractionMessage({
+          text: result.message,
+          type: "success",
+        });
+      } else {
+        setExtractionMessage({
+          text: result.message,
+          type: "info",
+        });
+      }
+
+      // Store defaults from extraction result
+      setExtractedDefaults(result.defaultValues);
+
+      // Open sheet with the resulting defaultValues
+      setSheetOpen(true);
+    } catch (err) {
+      setExtractionMessage({
+        text: "Đã có lỗi xảy ra. Vui lòng thử lại.",
+        type: "info",
+      });
+
+      // Fallback: still open sheet with basic values
+      setExtractedDefaults({
+        affiliate_url: url.trim(),
+        notes: notes.trim() || undefined,
+      });
+      setSheetOpen(true);
+    } finally {
+      setIsExtracting(false);
+    }
+  }, [url, notes]);
 
   function handleCloseSheet() {
     setSheetOpen(false);
+    setExtractionMessage(null);
   }
 
-  const defaultValues: ProductFormDefaultValues = {
+  // Use extracted defaults if available, otherwise fallback to basic values
+  const defaultValues: ProductFormDefaultValues = extractedDefaults ?? {
     affiliate_url: url.trim(),
     notes: notes.trim() || undefined,
   };
 
   const helperBullets = [
-    "Tự động điền tên, giá, hoa hồng từ link",
+    "Tự động lấy tên, mô tả từ link sản phẩm",
     "Hỗ trợ Shopee, Tiki, Lazada, TikTok Shop",
     "Tạo bản nháp — bạn chỉnh sửa trước khi lưu",
   ];
@@ -95,6 +159,7 @@ export default function ProductImportCard({ channel }: ProductImportCardProps) {
                   setUrl(e.target.value);
                   if (error) setError("");
                 }}
+                disabled={isExtracting}
                 placeholder="https://shopee.vn/... hoặc link affiliate..."
                 className={inputClassName}
               />
@@ -112,6 +177,7 @@ export default function ProductImportCard({ channel }: ProductImportCardProps) {
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
+                disabled={isExtracting}
                 placeholder="Ghi chú nhanh về sản phẩm, ưu điểm hoặc tệp khách hàng nếu có..."
                 className={textareaClassName}
               />
@@ -120,12 +186,39 @@ export default function ProductImportCard({ channel }: ProductImportCardProps) {
             <div className="space-y-3 pt-1">
               <button
                 type="button"
-                onClick={handleOpenSheet}
-                className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 text-[15px] font-extrabold text-white shadow-[0_14px_34px_rgba(16,185,129,0.22)] transition hover:bg-emerald-700 hover:-translate-y-0.5"
+                onClick={handleExtract}
+                disabled={isExtracting}
+                className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 text-[15px] font-extrabold text-white shadow-[0_14px_34px_rgba(16,185,129,0.22)] transition hover:bg-emerald-700 hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
               >
-                <FileText className="h-5 w-5" />
-                Tạo bản nháp sản phẩm
+                {isExtracting ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Đang lấy thông tin...
+                  </>
+                ) : (
+                  <>
+                    <FileText className="h-5 w-5" />
+                    Lấy thông tin sản phẩm
+                  </>
+                )}
               </button>
+
+              {extractionMessage && (
+                <div
+                  className={`flex items-start gap-2 rounded-2xl px-4 py-3 text-[13px] font-semibold ${
+                    extractionMessage.type === "success"
+                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200/60"
+                      : "bg-amber-50 text-amber-700 border border-amber-200/60"
+                  }`}
+                >
+                  {extractionMessage.type === "success" ? (
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
+                  ) : (
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                  )}
+                  <span>{extractionMessage.text}</span>
+                </div>
+              )}
 
               <p className="text-center text-[12px] font-medium text-slate-400">
                 Bạn có thể chỉnh lại toàn bộ thông tin trước khi lưu.
