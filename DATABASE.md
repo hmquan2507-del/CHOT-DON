@@ -90,3 +90,4 @@
 - revenue
 - notes
 - created_at
+product_imports = bảng lưu link import sản phẩm, chuẩn bị cho Smart Product Import, metadata extraction và scraping adapter sau này.
