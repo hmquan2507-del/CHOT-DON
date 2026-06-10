@@ -12,9 +12,21 @@ type ChannelSummary = {
   niche: string | null;
 };
 
+export type ProductFormDefaultValues = {
+  affiliate_url?: string;
+  notes?: string;
+  name?: string;
+  price?: string | number;
+  commission?: string | number;
+  category?: string;
+  strengths?: string;
+  target_customer?: string;
+};
+
 type ProductFormProps = {
   channel: ChannelSummary | null;
   product?: Product;
+  defaultValues?: ProductFormDefaultValues;
 };
 
 const inputClassName =
@@ -25,7 +37,7 @@ const textareaClassName =
 
 const labelClassName = "mb-2 block text-[13px] font-extrabold text-slate-700";
 
-export default function ProductForm({ channel, product }: ProductFormProps) {
+export default function ProductForm({ channel, product, defaultValues }: ProductFormProps) {
   const isEditing = !!product;
   return (
     <section
@@ -107,7 +119,7 @@ export default function ProductForm({ channel, product }: ProductFormProps) {
           <input
             name="name"
             required
-            defaultValue={product?.name ?? ""}
+            defaultValue={product?.name ?? defaultValues?.name ?? ""}
             placeholder="Nhập tên sản phẩm..."
             className={inputClassName}
           />
@@ -122,7 +134,7 @@ export default function ProductForm({ channel, product }: ProductFormProps) {
               name="price"
               type="number"
               min="0"
-              defaultValue={product?.price ?? ""}
+              defaultValue={product?.price ?? defaultValues?.price ?? ""}
               placeholder="0"
               className={inputClassName}
             />
@@ -137,7 +149,7 @@ export default function ProductForm({ channel, product }: ProductFormProps) {
               type="number"
               min="0"
               step="0.1"
-              defaultValue={product?.commission ?? ""}
+              defaultValue={product?.commission ?? defaultValues?.commission ?? ""}
               placeholder="0.0"
               className={inputClassName}
             />
@@ -151,7 +163,7 @@ export default function ProductForm({ channel, product }: ProductFormProps) {
           <input
             name="affiliate_url"
             type="url"
-            defaultValue={product?.affiliate_url ?? ""}
+            defaultValue={product?.affiliate_url ?? defaultValues?.affiliate_url ?? ""}
             placeholder="https://..."
             className={inputClassName}
           />
@@ -163,7 +175,7 @@ export default function ProductForm({ channel, product }: ProductFormProps) {
           </label>
           <input
             name="category"
-            defaultValue={product?.category ?? ""}
+            defaultValue={product?.category ?? defaultValues?.category ?? ""}
             placeholder="Vd: Skincare, Gia dụng..."
             className={inputClassName}
           />
@@ -206,7 +218,7 @@ export default function ProductForm({ channel, product }: ProductFormProps) {
           </label>
           <textarea
             name="strengths"
-            defaultValue={product?.strengths ?? ""}
+            defaultValue={product?.strengths ?? defaultValues?.strengths ?? ""}
             placeholder="Vd: Thành phần tự nhiên, hiệu quả sau 7 ngày..."
             className={textareaClassName}
           />
@@ -218,7 +230,7 @@ export default function ProductForm({ channel, product }: ProductFormProps) {
           </label>
           <textarea
             name="target_customer"
-            defaultValue={product?.target_customer ?? ""}
+            defaultValue={product?.target_customer ?? defaultValues?.target_customer ?? ""}
             placeholder="Vd: Nữ 18-25 tuổi, da dầu mụn..."
             className={textareaClassName}
           />
@@ -230,7 +242,7 @@ export default function ProductForm({ channel, product }: ProductFormProps) {
           </label>
           <textarea
             name="notes"
-            defaultValue={product?.notes ?? ""}
+            defaultValue={product?.notes ?? defaultValues?.notes ?? ""}
             placeholder="Thông tin nội bộ, không bắt buộc..."
             className="min-h-[80px] w-full resize-none rounded-2xl border border-[#DDE6EC] bg-white px-4 py-3 text-[15px] font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100/50 hover:border-slate-300"
           />

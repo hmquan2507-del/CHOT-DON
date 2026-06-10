@@ -9,6 +9,7 @@ import ProductEmptyState from "@/components/app/products/ProductEmptyState";
 import ProductForm from "@/components/app/products/ProductForm";
 import ProductList from "@/components/app/products/ProductList";
 import ProductPriorityPanel from "@/components/app/products/ProductPriorityPanel";
+import ProductImportCard from "@/components/app/products/ProductImportCard";
 
 type ChannelSummary = {
   id: string;
@@ -222,6 +223,7 @@ export default async function ProductsPage() {
 
         <aside className="space-y-6">
           <ProductForm channel={channel} />
+          <ProductImportCard channel={channel} />
           <ProductPriorityPanel products={priorityProducts} />
         </aside>
       </div>
