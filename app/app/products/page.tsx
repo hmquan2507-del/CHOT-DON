@@ -161,7 +161,7 @@ export default async function ProductsPage() {
   const priorityProducts = getPriorityProducts(products);
 
   return (
-    <div className="mx-auto max-w-[1440px] space-y-8 pb-10">
+    <div className="mx-auto max-w-[1440px] space-y-6 pb-10">
       <header className="space-y-3">
         <div className="flex flex-wrap items-center gap-2 text-sm font-medium text-slate-500">
           <span>Content Chốt Đơn</span>
@@ -204,10 +204,15 @@ export default async function ProductsPage() {
         </div>
       ) : null}
 
-      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_380px] 2xl:grid-cols-[minmax(0,1fr)_400px]">
-        <section className="min-w-0 space-y-8">
-          <ProductStats stats={stats} />
+      {/* Stats at full width */}
+      <ProductStats stats={stats} />
 
+      {/* Import card — prominent position near the top */}
+      <ProductImportCard channel={channel} />
+
+      {/* Two-column grid: left = analytics + list, right = form + priority */}
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_380px] 2xl:grid-cols-[minmax(0,1fr)_400px]">
+        <section className="min-w-0 space-y-6">
           <ProductAnalytics
             products={products}
             categoryDistribution={categoryDistribution}
@@ -223,7 +228,6 @@ export default async function ProductsPage() {
 
         <aside className="space-y-6">
           <ProductForm channel={channel} />
-          <ProductImportCard channel={channel} />
           <ProductPriorityPanel products={priorityProducts} />
         </aside>
       </div>

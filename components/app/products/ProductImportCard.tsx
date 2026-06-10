@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ExternalLink, FileText, X } from "lucide-react";
+import { ExternalLink, FileText, X, CheckCircle2 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import ProductForm from "./ProductForm";
 import type { ProductFormDefaultValues } from "./ProductForm";
@@ -48,71 +48,89 @@ export default function ProductImportCard({ channel }: ProductImportCardProps) {
     notes: notes.trim() || undefined,
   };
 
+  const helperBullets = [
+    "Tự động điền tên, giá, hoa hồng từ link",
+    "Hỗ trợ Shopee, Tiki, Lazada, TikTok Shop",
+    "Tạo bản nháp — bạn chỉnh sửa trước khi lưu",
+  ];
+
   return (
     <>
-      <section className="rounded-[24px] border border-slate-200/80 bg-white p-6 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
-        <div className="flex items-center gap-4 border-b border-slate-100 pb-5">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 shadow-sm border border-emerald-100/50">
-            <ExternalLink className="h-6 w-6" />
-          </div>
+      <section className="rounded-[24px] border border-slate-200/80 bg-white p-6 shadow-[0_18px_40px_rgba(15,23,42,0.06)] lg:p-8">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-12">
+          {/* Left: icon + title + description + helper bullets */}
+          <div className="flex shrink-0 flex-col lg:w-[340px]">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 shadow-sm border border-emerald-100/50">
+              <ExternalLink className="h-7 w-7" />
+            </div>
 
-          <div>
-            <h2 className="text-[17px] font-black tracking-[-0.02em] text-slate-950">
+            <h2 className="mt-5 text-xl font-black tracking-[-0.02em] text-slate-950">
               Nhập sản phẩm bằng link
             </h2>
-            <p className="mt-0.5 text-[13px] font-medium text-slate-500">
+
+            <p className="mt-2 text-sm font-medium leading-relaxed text-slate-500">
               Dán link sản phẩm hoặc link affiliate để tạo nhanh bản nháp sản phẩm.
             </p>
-          </div>
-        </div>
 
-        <div className="mt-6 space-y-5">
-          <div>
-            <label className="mb-2 block text-[13px] font-extrabold text-slate-700">
-              Link sản phẩm <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="url"
-              value={url}
-              onChange={(e) => {
-                setUrl(e.target.value);
-                if (error) setError("");
-              }}
-              placeholder="https://..."
-              className={inputClassName}
-            />
-            {error && (
-              <p className="mt-1.5 text-[13px] font-semibold text-red-500">
-                {error}
+            <ul className="mt-5 space-y-3">
+              {helperBullets.map((bullet) => (
+                <li key={bullet} className="flex items-start gap-3">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
+                  <span className="text-sm font-semibold text-slate-700">{bullet}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Right: URL input, notes, button */}
+          <div className="flex-1 space-y-5">
+            <div>
+              <label className="mb-2 block text-[13px] font-extrabold text-slate-700">
+                Link sản phẩm <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="url"
+                value={url}
+                onChange={(e) => {
+                  setUrl(e.target.value);
+                  if (error) setError("");
+                }}
+                placeholder="https://shopee.vn/... hoặc link affiliate..."
+                className={inputClassName}
+              />
+              {error && (
+                <p className="mt-1.5 text-[13px] font-semibold text-red-500">
+                  {error}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="mb-2 block text-[13px] font-extrabold text-slate-700">
+                Ghi chú nhanh
+              </label>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Ghi chú nhanh về sản phẩm, ưu điểm hoặc tệp khách hàng nếu có..."
+                className={textareaClassName}
+              />
+            </div>
+
+            <div className="space-y-3 pt-1">
+              <button
+                type="button"
+                onClick={handleOpenSheet}
+                className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 text-[15px] font-extrabold text-white shadow-[0_14px_34px_rgba(16,185,129,0.22)] transition hover:bg-emerald-700 hover:-translate-y-0.5"
+              >
+                <FileText className="h-5 w-5" />
+                Tạo bản nháp sản phẩm
+              </button>
+
+              <p className="text-center text-[12px] font-medium text-slate-400">
+                Bạn có thể chỉnh lại toàn bộ thông tin trước khi lưu.
               </p>
-            )}
-          </div>
-
-          <div>
-            <label className="mb-2 block text-[13px] font-extrabold text-slate-700">
-              Ghi chú nhanh
-            </label>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Ghi chú nhanh về sản phẩm, ưu điểm hoặc tệp khách hàng nếu có..."
-              className={textareaClassName}
-            />
-          </div>
-
-          <div className="space-y-3">
-            <button
-              type="button"
-              onClick={handleOpenSheet}
-              className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 text-[15px] font-extrabold text-white shadow-[0_14px_34px_rgba(16,185,129,0.22)] transition hover:bg-emerald-700 hover:-translate-y-0.5"
-            >
-              <FileText className="h-5 w-5" />
-              Tạo bản nháp sản phẩm
-            </button>
-
-            <p className="text-center text-[12px] font-medium text-slate-400">
-              Bạn có thể chỉnh lại toàn bộ thông tin trước khi lưu.
-            </p>
+            </div>
           </div>
         </div>
       </section>

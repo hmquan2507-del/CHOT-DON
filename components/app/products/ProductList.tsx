@@ -60,7 +60,7 @@ export default function ProductList({ products, channel }: ProductListProps) {
         </div>
       </div>
 
-      <div className="mt-6 grid gap-5 md:grid-cols-2 2xl:grid-cols-3">
+      <div className="mt-6 grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
         {products.map((product) => (
           <ProductCard key={product.id} product={product} channel={channel} />
         ))}
