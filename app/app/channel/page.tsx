@@ -3,8 +3,13 @@ import { ChevronRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import ChannelAiReadinessCard from "@/components/app/channel/ChannelAiReadinessCard";
 import ChannelEmptyState from "@/components/app/channel/ChannelEmptyState";
+import ChannelPositioningAiCard from "@/components/app/channel/ChannelPositioningAiCard";
 import ChannelProfileCard from "@/components/app/channel/ChannelProfileCard";
 import ChannelProfileForm from "@/components/app/channel/ChannelProfileForm";
+import type {
+  AIChannelPositioningResult,
+  AIChannelPositioningStatus,
+} from "@/types/ai-channel-positioning";
 
 export type ChannelProfile = {
   id: string;
@@ -23,11 +28,32 @@ export type ChannelProfile = {
   channel_status: string | null;
   current_situation: string | null;
   desired_positioning: string | null;
+  ai_positioning_advice?: string | null;
+  ai_positioning_result?: AIChannelPositioningResult | null;
+  ai_positioning_generated_at?: string | null;
   created_at?: string | null;
   updated_at?: string | null;
 };
 
-export default async function ChannelPage() {
+type ChannelPageProps = {
+  searchParams?: Promise<{
+    ai_positioning?: string | string[];
+  }>;
+};
+
+function getAIPositioningStatus(
+  value: string | string[] | undefined,
+): AIChannelPositioningStatus | null {
+  const status = Array.isArray(value) ? value[0] : value;
+
+  if (status === "succeeded" || status === "missing_key" || status === "failed") {
+    return status;
+  }
+
+  return null;
+}
+
+export default async function ChannelPage({ searchParams }: ChannelPageProps) {
   const supabase = await createClient();
 
   const {
@@ -38,6 +64,11 @@ export default async function ChannelPage() {
   if (error || !user) {
     redirect("/login");
   }
+
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const aiPositioningStatus = getAIPositioningStatus(
+    resolvedSearchParams?.ai_positioning,
+  );
 
   const { data: channelData } = await supabase
     .from("channels")
@@ -73,6 +104,13 @@ export default async function ChannelPage() {
         <section className="space-y-6">
           <ChannelProfileCard channel={channel} />
           <ChannelAiReadinessCard channel={channel} />
+          <ChannelPositioningAiCard
+            channelId={channel?.id}
+            result={channel?.ai_positioning_result}
+            generatedAt={channel?.ai_positioning_generated_at}
+            status={aiPositioningStatus}
+            legacyAdvice={channel?.ai_positioning_advice}
+          />
           <ChannelEmptyState channel={channel} />
         </section>
 

@@ -1,6 +1,16 @@
-export type ChannelPlatform = "TikTok" | "YouTube Shorts" | "Facebook Reels" | "Đa nền tảng";
+import type { AIChannelPositioningResult } from "@/types/ai-channel-positioning";
 
-export type ExperienceLevel = "Người mới bắt đầu" | "Đã từng đăng video" | "Đã có kênh nhưng chưa đều" | "Đã có doanh thu";
+export type ChannelPlatform =
+  | "TikTok"
+  | "YouTube Shorts"
+  | "Facebook Reels"
+  | "Đa nền tảng";
+
+export type ExperienceLevel =
+  | "Người mới bắt đầu"
+  | "Đã từng đăng video"
+  | "Đã có kênh nhưng chưa đều"
+  | "Đã có doanh thu";
 
 export interface Channel {
   id: string;
@@ -20,6 +30,8 @@ export interface Channel {
   current_situation: string | null;
   desired_positioning: string | null;
   ai_positioning_advice: string | null;
+  ai_positioning_result: AIChannelPositioningResult | null;
+  ai_positioning_generated_at: string | null;
   created_at: string;
   updated_at: string;
 }
