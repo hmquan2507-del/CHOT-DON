@@ -8,12 +8,19 @@ import {
   CheckCircle2,
   Loader2,
   AlertCircle,
+  Sparkles,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import ProductForm from "./ProductForm";
 import type { ProductFormDefaultValues } from "./ProductForm";
-import { extractProductMetadata } from "@/actions/product-imports";
-import type { ExtractProductMetadataResult } from "@/actions/product-imports";
+import {
+  extractProductMetadata,
+  enrichProductImport,
+} from "@/actions/product-imports";
+import type {
+  EnrichProductImportResult,
+  ExtractProductMetadataResult,
+} from "@/actions/product-imports";
 
 type ChannelSummary = {
   id: string;
@@ -26,9 +33,9 @@ type ProductImportCardProps = {
   channel: ChannelSummary | null;
 };
 
-type ExtractionMessage = {
+type FeedbackMessage = {
   text: string;
-  type: "success" | "info";
+  type: "success" | "info" | "warning";
 };
 
 const inputClassName =
@@ -43,16 +50,20 @@ export default function ProductImportCard({ channel }: ProductImportCardProps) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [error, setError] = useState("");
   const [isExtracting, setIsExtracting] = useState(false);
-  const [extractionMessage, setExtractionMessage] = useState<ExtractionMessage | null>(null);
-  const [extractedDefaults, setExtractedDefaults] = useState<ProductFormDefaultValues | null>(null);
+  const [isEnriching, setIsEnriching] = useState(false);
+  const [extractionMessage, setExtractionMessage] =
+    useState<FeedbackMessage | null>(null);
+  const [enrichmentMessage, setEnrichmentMessage] =
+    useState<FeedbackMessage | null>(null);
+  const [extractedDefaults, setExtractedDefaults] =
+    useState<ProductFormDefaultValues | null>(null);
 
   const handleExtract = useCallback(async () => {
-    // Reset states
     setError("");
     setExtractionMessage(null);
+    setEnrichmentMessage(null);
     setExtractedDefaults(null);
 
-    // Validate URL client-side
     if (!url.trim()) {
       setError("Vui lòng nhập link sản phẩm.");
       return;
@@ -66,47 +77,102 @@ export default function ProductImportCard({ channel }: ProductImportCardProps) {
         notes.trim(),
       );
 
-      // Set extraction message
-      if (result.success) {
-        setExtractionMessage({
-          text: result.message,
-          type: "success",
-        });
-      } else {
-        setExtractionMessage({
-          text: result.message,
-          type: "info",
-        });
-      }
+      setExtractionMessage({
+        text: result.message,
+        type: result.success ? "success" : "info",
+      });
 
-      // Store defaults from extraction result
       setExtractedDefaults(result.defaultValues);
-
-      // Open sheet with the resulting defaultValues
       setSheetOpen(true);
-    } catch (err) {
+    } catch {
       setExtractionMessage({
         text: "Đã có lỗi xảy ra. Vui lòng thử lại.",
         type: "info",
       });
 
-      // Fallback: still open sheet with basic values
       setExtractedDefaults({
         affiliate_url: url.trim(),
         notes: notes.trim() || undefined,
       });
+
       setSheetOpen(true);
     } finally {
       setIsExtracting(false);
     }
   }, [url, notes]);
 
+  const handleAIEnrich = useCallback(async () => {
+    setError("");
+    setEnrichmentMessage(null);
+
+    if (!url.trim()) {
+      setError("Vui lòng nhập link sản phẩm.");
+      return;
+    }
+
+    setIsEnriching(true);
+
+    try {
+      let baseDefaults = extractedDefaults;
+
+      if (!baseDefaults) {
+        const metadataResult = await extractProductMetadata(
+          url.trim(),
+          notes.trim(),
+        );
+
+        baseDefaults = metadataResult.defaultValues;
+
+        setExtractionMessage({
+          text: metadataResult.message,
+          type: metadataResult.success ? "success" : "info",
+        });
+      }
+
+      const result: EnrichProductImportResult = await enrichProductImport(
+        url.trim(),
+        notes.trim(),
+        baseDefaults,
+      );
+
+      setExtractedDefaults(result.defaultValues);
+
+      if (result.success) {
+        setEnrichmentMessage({
+          text: "AI đã gợi ý xong. Vui lòng kiểm tra trước khi lưu.",
+          type: "success",
+        });
+      } else {
+        setEnrichmentMessage({
+          text: result.message,
+          type: result.status === "missing_key" ? "warning" : "info",
+        });
+      }
+
+      setSheetOpen(true);
+    } catch {
+      setEnrichmentMessage({
+        text: "AI chưa thể gợi ý. Bạn vẫn có thể nhập thủ công.",
+        type: "info",
+      });
+
+      setExtractedDefaults(
+        extractedDefaults ?? {
+          affiliate_url: url.trim(),
+          notes: notes.trim() || undefined,
+        },
+      );
+
+      setSheetOpen(true);
+    } finally {
+      setIsEnriching(false);
+    }
+  }, [url, notes, extractedDefaults]);
+
   function handleCloseSheet() {
     setSheetOpen(false);
-    setExtractionMessage(null);
   }
 
-  // Use extracted defaults if available, otherwise fallback to basic values
   const defaultValues: ProductFormDefaultValues = extractedDefaults ?? {
     affiliate_url: url.trim(),
     notes: notes.trim() || undefined,
@@ -114,17 +180,40 @@ export default function ProductImportCard({ channel }: ProductImportCardProps) {
 
   const helperBullets = [
     "Tự động lấy tên, mô tả từ link sản phẩm",
-    "Hỗ trợ Shopee, Tiki, Lazada, TikTok Shop",
+    "AI có thể gợi ý ngách, điểm mạnh và khách hàng phù hợp",
     "Tạo bản nháp — bạn chỉnh sửa trước khi lưu",
   ];
+
+  const isBusy = isExtracting || isEnriching;
+
+  function renderFeedbackMessage(message: FeedbackMessage) {
+    const className =
+      message.type === "success"
+        ? "bg-emerald-50 text-emerald-700 border border-emerald-200/60"
+        : message.type === "warning"
+          ? "bg-amber-50 text-amber-700 border border-amber-200/60"
+          : "bg-slate-50 text-slate-600 border border-slate-200/70";
+
+    return (
+      <div
+        className={`flex items-start gap-2 rounded-2xl px-4 py-3 text-[13px] font-semibold ${className}`}
+      >
+        {message.type === "success" ? (
+          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
+        ) : (
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+        )}
+        <span>{message.text}</span>
+      </div>
+    );
+  }
 
   return (
     <>
       <section className="rounded-[24px] border border-slate-200/80 bg-white p-6 shadow-[0_18px_40px_rgba(15,23,42,0.06)] lg:p-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-12">
-          {/* Left: icon + title + description + helper bullets */}
           <div className="flex shrink-0 flex-col lg:w-[340px]">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 shadow-sm border border-emerald-100/50">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-emerald-100/50 bg-emerald-50 text-emerald-600 shadow-sm">
               <ExternalLink className="h-7 w-7" />
             </div>
 
@@ -133,20 +222,22 @@ export default function ProductImportCard({ channel }: ProductImportCardProps) {
             </h2>
 
             <p className="mt-2 text-sm font-medium leading-relaxed text-slate-500">
-              Dán link sản phẩm hoặc link affiliate để tạo nhanh bản nháp sản phẩm.
+              Dán link sản phẩm hoặc link affiliate để tạo nhanh bản nháp sản
+              phẩm.
             </p>
 
             <ul className="mt-5 space-y-3">
               {helperBullets.map((bullet) => (
                 <li key={bullet} className="flex items-start gap-3">
                   <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
-                  <span className="text-sm font-semibold text-slate-700">{bullet}</span>
+                  <span className="text-sm font-semibold text-slate-700">
+                    {bullet}
+                  </span>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Right: URL input, notes, button */}
           <div className="flex-1 space-y-5">
             <div>
               <label className="mb-2 block text-[13px] font-extrabold text-slate-700">
@@ -155,19 +246,19 @@ export default function ProductImportCard({ channel }: ProductImportCardProps) {
               <input
                 type="url"
                 value={url}
-                onChange={(e) => {
-                  setUrl(e.target.value);
+                onChange={(event) => {
+                  setUrl(event.target.value);
                   if (error) setError("");
                 }}
-                disabled={isExtracting}
+                disabled={isBusy}
                 placeholder="https://shopee.vn/... hoặc link affiliate..."
                 className={inputClassName}
               />
-              {error && (
+              {error ? (
                 <p className="mt-1.5 text-[13px] font-semibold text-red-500">
                   {error}
                 </p>
-              )}
+              ) : null}
             </div>
 
             <div>
@@ -176,19 +267,19 @@ export default function ProductImportCard({ channel }: ProductImportCardProps) {
               </label>
               <textarea
                 value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                disabled={isExtracting}
+                onChange={(event) => setNotes(event.target.value)}
+                disabled={isBusy}
                 placeholder="Ghi chú nhanh về sản phẩm, ưu điểm hoặc tệp khách hàng nếu có..."
                 className={textareaClassName}
               />
             </div>
 
-            <div className="space-y-3 pt-1">
+            <div className="grid gap-3 pt-1 sm:grid-cols-2">
               <button
                 type="button"
                 onClick={handleExtract}
-                disabled={isExtracting}
-                className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 text-[15px] font-extrabold text-white shadow-[0_14px_34px_rgba(16,185,129,0.22)] transition hover:bg-emerald-700 hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                disabled={isBusy}
+                className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 text-[15px] font-extrabold text-white shadow-[0_14px_34px_rgba(16,185,129,0.22)] transition hover:-translate-y-0.5 hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
               >
                 {isExtracting ? (
                   <>
@@ -203,27 +294,34 @@ export default function ProductImportCard({ channel }: ProductImportCardProps) {
                 )}
               </button>
 
-              {extractionMessage && (
-                <div
-                  className={`flex items-start gap-2 rounded-2xl px-4 py-3 text-[13px] font-semibold ${
-                    extractionMessage.type === "success"
-                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200/60"
-                      : "bg-amber-50 text-amber-700 border border-amber-200/60"
-                  }`}
-                >
-                  {extractionMessage.type === "success" ? (
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
-                  ) : (
-                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-                  )}
-                  <span>{extractionMessage.text}</span>
-                </div>
-              )}
-
-              <p className="text-center text-[12px] font-medium text-slate-400">
-                Bạn có thể chỉnh lại toàn bộ thông tin trước khi lưu.
-              </p>
+              <button
+                type="button"
+                onClick={handleAIEnrich}
+                disabled={isBusy}
+                className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 text-[15px] font-extrabold text-emerald-700 transition hover:-translate-y-0.5 hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+              >
+                {isEnriching ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    AI đang gợi ý thông tin...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-5 w-5" />
+                    AI gợi ý thông tin bán hàng
+                  </>
+                )}
+              </button>
             </div>
+
+            <div className="space-y-3">
+              {extractionMessage ? renderFeedbackMessage(extractionMessage) : null}
+              {enrichmentMessage ? renderFeedbackMessage(enrichmentMessage) : null}
+            </div>
+
+            <p className="text-center text-[12px] font-medium text-slate-400">
+              Bạn có thể chỉnh lại toàn bộ thông tin trước khi lưu.
+            </p>
           </div>
         </div>
       </section>
@@ -236,7 +334,7 @@ export default function ProductImportCard({ channel }: ProductImportCardProps) {
         >
           <SheetHeader className="flex flex-row items-center justify-between border-b border-slate-100 px-6 py-5">
             <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 shadow-sm border border-emerald-100/50">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-100/50 bg-emerald-50 text-emerald-600 shadow-sm">
                 <FileText className="h-6 w-6" />
               </div>
 
@@ -253,17 +351,14 @@ export default function ProductImportCard({ channel }: ProductImportCardProps) {
             <button
               type="button"
               onClick={handleCloseSheet}
-              className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
+              className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
             >
               <X className="h-5 w-5" />
             </button>
           </SheetHeader>
 
           <div className="overflow-y-auto px-6 py-6">
-            <ProductForm
-              channel={channel}
-              defaultValues={defaultValues}
-            />
+            <ProductForm channel={channel} defaultValues={defaultValues} />
           </div>
         </SheetContent>
       </Sheet>

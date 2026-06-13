@@ -7,7 +7,12 @@ import {
   extractDomain,
 } from "@/lib/product-import/url";
 import { extractMetadata } from "@/lib/product-import/extract-metadata";
+import { enrichProductWithAI } from "@/lib/ai/product-enrichment";
 import type { ProductFormDefaultValues } from "@/components/app/products/ProductForm";
+import type {
+  AIProductEnrichmentResult,
+  AIProductEnrichmentStatus,
+} from "@/types/ai-product-enrichment";
 
 export type ExtractProductMetadataResult = {
   defaultValues: ProductFormDefaultValues;
@@ -15,6 +20,52 @@ export type ExtractProductMetadataResult = {
   message: string;
   importId?: string;
 };
+
+export type EnrichProductImportResult = {
+  defaultValues: ProductFormDefaultValues;
+  success: boolean;
+  status: AIProductEnrichmentStatus;
+  message: string;
+  enrichment?: AIProductEnrichmentResult;
+};
+
+type ChannelContext = {
+  name: string | null;
+  platform: string | null;
+  niche: string | null;
+  goal: string | null;
+  target_audience: string | null;
+  content_style: string | null;
+};
+
+function appendAIEnrichmentToNotes(
+  baseNotes: string | undefined,
+  enrichment: AIProductEnrichmentResult,
+) {
+  const sections = [
+    enrichment.notes
+      ? `Ghi chú AI:\n${enrichment.notes}`
+      : null,
+    enrichment.content_angles.length > 0
+      ? `Góc nội dung gợi ý:\n${enrichment.content_angles
+          .map((item) => `- ${item}`)
+          .join("\n")}`
+      : null,
+    enrichment.hook_examples.length > 0
+      ? `Hook gợi ý:\n${enrichment.hook_examples
+          .map((item) => `- ${item}`)
+          .join("\n")}`
+      : null,
+    enrichment.cta_examples.length > 0
+      ? `CTA gợi ý:\n${enrichment.cta_examples
+          .map((item) => `- ${item}`)
+          .join("\n")}`
+      : null,
+    `Độ tin cậy AI: ${enrichment.confidence}`,
+  ].filter(Boolean);
+
+  return [baseNotes, sections.join("\n\n")].filter(Boolean).join("\n\n");
+}
 
 /**
  * Server action: extract metadata from a product/affiliate URL.
@@ -33,7 +84,6 @@ export async function extractProductMetadata(
   rawUrl: string,
   userNotes: string,
 ): Promise<ExtractProductMetadataResult> {
-  // 1. Auth — must be server-side, never trust client user_id
   const supabase = await createClient();
 
   const {
@@ -52,7 +102,6 @@ export async function extractProductMetadata(
     };
   }
 
-  // 2. Validate URL
   const validationError = validateUrl(rawUrl);
 
   if (validationError) {
@@ -66,8 +115,6 @@ export async function extractProductMetadata(
   const sourceUrl = normalizeUrl(rawUrl);
   const sourceDomain = extractDomain(sourceUrl);
 
-  // 3. Create product_imports record with status "pending"
-  //    Non-blocking: if insert fails, we still proceed with extraction
   let importId: string | undefined;
 
   try {
@@ -88,21 +135,16 @@ export async function extractProductMetadata(
     }
   } catch (error) {
     console.error("Failed to create product_import record:", error);
-    // Non-blocking — continue with extraction
   }
 
-  // 4. Attempt metadata extraction
   try {
     const metadata = await extractMetadata(sourceUrl);
 
-    // Combine metadata description with user notes
-    const notesParts = [metadata.description, userNotes?.trim()]
-      .filter(Boolean);
+    const notesParts = [metadata.description, userNotes?.trim()].filter(Boolean);
 
     const combinedNotes =
       notesParts.length > 0 ? notesParts.join("\n\n") : undefined;
 
-    // 5. Update record with success
     if (importId) {
       await supabase
         .from("product_imports")
@@ -132,7 +174,6 @@ export async function extractProductMetadata(
         ? error.message
         : "Không thể lấy thông tin từ link.";
 
-    // 5. Update record with failure
     if (importId) {
       await supabase
         .from("product_imports")
@@ -154,4 +195,96 @@ export async function extractProductMetadata(
       importId,
     };
   }
+}
+
+export async function enrichProductImport(
+  rawUrl: string,
+  userNotes: string,
+  baseDefaultValues?: ProductFormDefaultValues,
+): Promise<EnrichProductImportResult> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  const fallbackDefaults: ProductFormDefaultValues = {
+    ...baseDefaultValues,
+    affiliate_url: baseDefaultValues?.affiliate_url || rawUrl?.trim() || undefined,
+    notes: baseDefaultValues?.notes || userNotes?.trim() || undefined,
+  };
+
+  if (userError || !user) {
+    return {
+      success: false,
+      status: "failed",
+      message: "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.",
+      defaultValues: fallbackDefaults,
+    };
+  }
+
+  const validationError = validateUrl(rawUrl);
+
+  if (validationError) {
+    return {
+      success: false,
+      status: "failed",
+      message: validationError,
+      defaultValues: fallbackDefaults,
+    };
+  }
+
+  const sourceUrl = normalizeUrl(rawUrl);
+  const sourceDomain = extractDomain(sourceUrl);
+
+  const { data: channelData } = await supabase
+    .from("channels")
+    .select("name, platform, niche, goal, target_audience, content_style")
+    .eq("user_id", user.id)
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const channel = (channelData ?? null) as ChannelContext | null;
+
+  const aiResult = await enrichProductWithAI({
+    sourceUrl,
+    sourceDomain,
+    metadataTitle: baseDefaultValues?.name || null,
+    metadataDescription: baseDefaultValues?.notes || null,
+    userNotes: userNotes?.trim() || null,
+    channel,
+  });
+
+  if (aiResult.status !== "succeeded" || !aiResult.result) {
+    return {
+      success: false,
+      status: aiResult.status,
+      message: aiResult.message,
+      defaultValues: {
+        ...fallbackDefaults,
+        affiliate_url: sourceUrl,
+      },
+    };
+  }
+
+  const enrichment = aiResult.result;
+
+  return {
+    success: true,
+    status: "succeeded",
+    message: aiResult.message,
+    enrichment,
+    defaultValues: {
+      ...fallbackDefaults,
+      affiliate_url: sourceUrl,
+      name: enrichment.name || fallbackDefaults.name,
+      category: enrichment.category || fallbackDefaults.category,
+      strengths: enrichment.strengths || fallbackDefaults.strengths,
+      target_customer:
+        enrichment.target_customer || fallbackDefaults.target_customer,
+      notes: appendAIEnrichmentToNotes(fallbackDefaults.notes, enrichment),
+    },
+  };
 }
