@@ -2,128 +2,166 @@
 
 ## Current Phase
 
-Phase 5 — AI Channel Positioning
+Phase 6 — AI Content Ideas
 
 ## Goal
 
-Add AI-powered channel positioning for the Channel Profile module.
+Create the Content Ideas module.
 
-The user already has a channel profile with:
+The user should be able to generate short-video content ideas using AI based on:
 
-* name
-* platform
-* experience_level
-* niche
-* goal
-* target_audience
-* content_style
-* channel_status
-* current_situation
-* desired_positioning
-* social links
-* avatar
+* Channel Profile
+* AI Channel Positioning result
+* Product Library
+* Product AI enrichment data if available
+* User-selected product
+* User-selected goal/platform
 
-This phase adds an AI action that reads the current channel profile and generates a structured positioning strategy.
+The generated ideas must be reviewed by the user and saved into Supabase `content_ideas`.
+
+## Existing Completed Phases
+
+* Phase 3 — Channel Profile
+* Phase 4.3 — Product Library edit/delete + dashboard product count
+* Phase 4.4A — Product link import draft flow
+* Phase 4.4B — Product metadata extraction
+* Phase 4.5A — AI Product Enrichment Foundation
+* Phase 5 — AI Channel Positioning
 
 ## User Flow
 
-1. User goes to `/app/channel`.
-2. User has already created or updated a channel profile.
-3. User clicks a button:
-   `AI tư vấn định vị kênh`
-4. Server reads the current authenticated user and their channel.
-5. Server sends channel data to AI.
-6. AI returns structured positioning result.
-7. System saves the result to Supabase.
-8. UI displays a professional result card on `/app/channel`.
+1. User goes to `/app/ideas`.
+2. Page shows current ideas from Supabase.
+3. User clicks `Tạo ý tưởng bằng AI`.
+4. User selects:
 
-## AI Should Generate
+   * Channel
+   * Product optional
+   * Platform
+   * Goal
+   * Number of ideas
+5. Server reads:
 
-AI result should include:
+   * current user
+   * selected channel
+   * channel.ai_positioning_result
+   * selected product if any
+   * recent products if no product selected
+6. AI generates structured content ideas.
+7. UI shows preview list.
+8. User can save selected ideas.
+9. Saved ideas are inserted into `content_ideas`.
+10. Ideas remain after refresh.
 
-* positioning_statement
-* target_audience_summary
-* channel_angle
-* tone_of_voice
-* content_pillars
-* starter_video_ideas
-* cta_strategy
-* mistakes_to_avoid
-* next_steps
-* confidence
+## Database
+
+Use table `content_ideas`.
+
+Required fields:
+
+* id
+* user_id
+* channel_id
+* product_id
+* title
+* hook
+* angle
+* platform
+* content_format
+* goal
+* target_audience
+* cta
+* hashtags
+* notes
+* source_type
+* status
+* priority
+* ai_reason
+* ai_raw_result
+* created_at
+* updated_at
+
+If table does not exist, ask user to run the approved SQL migration before coding.
+
+## AI Output
+
+AI should return structured JSON.
 
 Suggested type:
 
 ```ts
-export type AIChannelPositioningResult = {
-  positioning_statement: string;
-  target_audience_summary: string;
-  channel_angle: string;
-  tone_of_voice: string;
-  content_pillars: Array<{
-    title: string;
-    description: string;
-    example_topics: string[];
-  }>;
-  starter_video_ideas: Array<{
-    title: string;
-    hook: string;
-    format: string;
-    goal: string;
-  }>;
-  cta_strategy: string[];
-  mistakes_to_avoid: string[];
-  next_steps: string[];
+export type AIContentIdea = {
+  title: string;
+  hook: string;
+  angle: string;
+  platform: string;
+  content_format: string;
+  goal: string;
+  target_audience: string;
+  cta: string;
+  hashtags: string[];
+  notes: string;
+  priority: "low" | "normal" | "high";
+  reason: string;
+};
+
+export type AIContentIdeasResult = {
+  ideas: AIContentIdea[];
   confidence: "high" | "medium" | "low";
 };
 ```
 
-## Database
+## AI Rules
 
-Use existing `channels` table.
+AI can generate:
 
-Required columns:
+* video idea title
+* hook
+* content angle
+* content format
+* CTA
+* hashtag suggestions
+* notes
+* reason why this idea fits the channel/product
 
-* ai_positioning_result jsonb
-* ai_positioning_generated_at timestamptz
+AI must not:
 
-If these columns do not exist, ask the user to run this SQL:
+* invent fake product claims
+* invent fake reviews
+* promise guaranteed results
+* create misleading medical/health claims
+* create platform policy claims
+* generate full video script in this phase
 
-```sql
-alter table public.channels
-add column if not exists ai_positioning_result jsonb,
-add column if not exists ai_positioning_generated_at timestamptz;
-```
-
-Do not create a new table in this phase.
+Full scripts belong to Phase 7.
 
 ## AI Provider
 
-Use the same provider strategy as Phase 4.5:
+Use the same provider strategy already used in Phase 4.5A / Phase 5.
 
-* Prefer Gemini if GEMINI_API_KEY exists
-* Otherwise support OpenAI if OPENAI_API_KEY exists
-* AI must run server-side only
+* Gemini if GEMINI_API_KEY is configured
+* OpenAI if OPENAI_API_KEY is configured
+* Server-side only
 * Never expose API keys in client components
 
 If no API key exists:
 
 * Do not crash
-* Show friendly fallback:
+* Show friendly message:
   `Chưa cấu hình API key AI. Vui lòng thêm GEMINI_API_KEY hoặc OPENAI_API_KEY.`
 
 ## Not In Scope
 
 Do not implement:
 
-* AI Content Ideas
 * AI Script Generator
-* AI Image/Video generation
-* Product scraping
+* Content Calendar
+* Metrics
+* AI Image Generation
+* AI Video Generation
+* Product scraping adapter 4.4C
 * BYOK
 * Billing/credits
-* Calendar
-* Metrics
 * Route refactor
 * Workspace/multi-tenant refactor
 * Database redesign
@@ -132,20 +170,25 @@ Do not implement:
 
 You may modify:
 
-* app/app/channel/page.tsx
-* actions/channels.ts
-* components/app/channel/*
-* types/channel.ts
+* app/app/ideas/page.tsx
+* components/app/ideas/*
+* actions/content-ideas.ts
+* types/content-idea.ts
 * lib/ai/*
 
 You may create:
 
-* lib/ai/channel-positioning.ts
-* lib/ai/prompts/channel-positioning.ts
-* lib/ai/schemas/channel-positioning.ts
-* types/ai-channel-positioning.ts
-* components/app/channel/ChannelPositioningCard.tsx
-* components/app/channel/ChannelPositioningButton.tsx
+* actions/content-ideas.ts
+* types/content-idea.ts
+* types/ai-content-ideas.ts
+* lib/ai/content-ideas.ts
+* lib/ai/prompts/content-ideas.ts
+* lib/ai/schemas/content-ideas.ts
+* components/app/ideas/ContentIdeaCard.tsx
+* components/app/ideas/ContentIdeasList.tsx
+* components/app/ideas/ContentIdeaGenerator.tsx
+* components/app/ideas/ContentIdeasEmptyState.tsx
+* components/app/ideas/ContentIdeaSaveButton.tsx if needed
 
 ## Forbidden Files
 
@@ -155,67 +198,139 @@ Do not modify:
 * components/landing/*
 * app/(auth)/*
 * components/auth/*
-* app/app/products/*
+* app/app/channel/* unless absolutely required
+* app/app/products/* unless absolutely required
 * actions/products.ts
 * actions/product-imports.ts
+* actions/channels.ts
 * lib/supabase/*
-* database schema except the approved channels columns
+* database schema except approved content_ideas table
 * package.json unless absolutely required
 * next.config.ts unless absolutely required
 
-## UI Requirements
+## Page UI Requirements
 
-On `/app/channel`, add a professional AI positioning section.
+Route:
 
-If no AI result exists:
+`/app/ideas`
 
-* Show a card:
-  Title: `AI tư vấn định vị kênh`
-  Description: `Dựa trên hồ sơ kênh của bạn, AI sẽ đề xuất định vị, trụ cột nội dung và hướng phát triển phù hợp.`
-  Button: `Tạo định vị bằng AI`
+Page layout:
 
-If AI result exists:
+* Keep dashboard sidebar/topbar.
+* Page title: `Ý tưởng nội dung`
+* Subtitle: `Tạo và quản lý ý tưởng video ngắn dựa trên kênh, sản phẩm và định vị AI.`
+* Top stats cards:
 
-Show a polished card with:
+  * Tổng ý tưởng
+  * Ý tưởng từ AI
+  * Sẵn sàng làm kịch bản
+  * Đã lên lịch / placeholder 0 if calendar not implemented
+* Main section:
 
-* Positioning statement
-* Target audience summary
-* Channel angle
-* Tone of voice
-* Content pillars
-* Starter video ideas
-* CTA strategy
-* Mistakes to avoid
-* Next steps
-* Generated date
-* Button: `Tạo lại định vị`
+  * Left: ideas list/grid
+  * Right: AI generator panel
 
-Keep current Channel Profile UI style.
+## AI Generator Panel UI
 
-Do not redesign the entire channel page.
+Card title:
+
+`Tạo ý tưởng bằng AI`
+
+Fields:
+
+* Channel select
+* Product select optional
+* Platform select:
+
+  * TikTok
+  * YouTube Shorts
+  * Facebook Reels
+* Goal select:
+
+  * Bán hàng
+  * Affiliate
+  * Tăng nhận diện
+  * Tăng tương tác
+  * Giáo dục khách hàng
+* Number of ideas:
+
+  * 3
+  * 5
+  * 10
+
+Button:
+
+`Tạo ý tưởng`
+
+Loading state:
+
+`AI đang tạo ý tưởng...`
+
+After generation:
+
+* Show preview ideas
+* Each idea has checkbox/select
+* Button: `Lưu ý tưởng đã chọn`
+
+## Ideas List UI
+
+Each idea card should show:
+
+* title
+* hook
+* angle
+* product name if available
+* platform
+* goal
+* priority badge
+* status badge
+* CTA
+* hashtags
+* source_type badge: AI / Thủ công
+* action button:
+
+  * `Dùng để viết kịch bản` disabled or placeholder for Phase 7
+  * `Lưu trữ` or `Xóa` optional if easy
+
+## Server Actions
+
+Required actions:
+
+* getContentIdeas or server query inside page
+* generateContentIdeasAction
+* saveGeneratedIdeasAction
+* createManualContentIdeaAction optional
+* updateContentIdeaStatusAction optional
+
+Rules:
+
+* Must get current authenticated user.
+* Must not trust client user_id.
+* Must only read/update current user data.
+* Must use Supabase server client.
+* Must revalidate `/app/ideas`.
+* Must keep TypeScript clean.
+* Must fallback gracefully if AI fails.
 
 ## Technical Rules
 
 * Do not use localStorage.
 * AI must run server-side only.
-* Validate AI output before saving.
-* If AI output is invalid, return a friendly error.
-* User must be authenticated.
-* User can only update their own channel.
-* Do not trust client user_id.
-* Keep TypeScript clean.
+* Validate AI output before rendering/saving.
+* User must review before saving.
+* Existing Channel/Product modules must not break.
 * Keep mobile responsive.
-* Existing channel create/update/avatar/social links must continue working.
 * Run `npm run build` after changes.
 
 ## Success Criteria
 
-* User can click `Tạo định vị bằng AI`.
-* AI generates structured positioning result.
-* Result is saved to Supabase.
-* Refresh page still shows AI result.
-* User can regenerate positioning.
-* Missing API key shows friendly error.
-* Existing Channel Profile form still works.
-* Existing avatar/social links still work.
+* `/app/ideas` loads.
+* Existing saved ideas display.
+* User can generate ideas with AI.
+* AI preview renders.
+* User can save selected generated ideas.
+* Saved ideas persist after refresh.
+* Missing API key shows friendly message.
+* No raw JSON shown.
+* No undefined/null shown.
 * `npm run build` passes.

@@ -95,3 +95,33 @@ channels.ai_positioning_result: lưu kết quả AI định vị kênh dạng JS
 channels.ai_positioning_generated_at: thời điểm AI tạo định vị gần nhất.
 
 product_imports = bảng lưu link import sản phẩm, chuẩn bị cho Smart Product Import, metadata extraction và scraping adapter sau này.
+
+## content_ideas
+
+Bảng lưu ý tưởng video ngắn cho từng user.
+
+Nguồn tạo:
+- manual: user tự thêm
+- ai: AI tạo từ channel profile, AI channel positioning và product library
+
+Các field chính:
+- user_id
+- channel_id
+- product_id
+- title
+- hook
+- angle
+- platform
+- content_format
+- goal
+- target_audience
+- cta
+- hashtags
+- notes
+- source_type
+- status
+- priority
+- ai_reason
+- ai_raw_result
+
+Bảng này là nền cho Phase 7 — AI Script Generator.
