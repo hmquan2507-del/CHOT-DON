@@ -1,9 +1,13 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import ChannelAiReadinessCard from "@/components/app/channel/ChannelAiReadinessCard";
-import ChannelEmptyState from "@/components/app/channel/ChannelEmptyState";
-import ChannelPositioningAiCard from "@/components/app/channel/ChannelPositioningAiCard";
+import {
+  ChannelPositioningAiCard,
+  ChannelStarterIdeasCard,
+  ChannelStrategyCards,
+} from "@/components/app/channel/ChannelPositioningAiCard";
 import ChannelProfileCard from "@/components/app/channel/ChannelProfileCard";
 import ChannelProfileForm from "@/components/app/channel/ChannelProfileForm";
 import type {
@@ -79,45 +83,84 @@ export default async function ChannelPage({ searchParams }: ChannelPageProps) {
     .maybeSingle();
 
   const channel = channelData as ChannelProfile | null;
+  const positioningResult = channel?.ai_positioning_result ?? null;
 
   return (
-    <div className="mx-auto w-full max-w-[1360px] space-y-6">
-      <header className="space-y-3">
-        <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-slate-500">
-          <span>Content Chốt Đơn</span>
-          <ChevronRight className="h-4 w-4 text-slate-400" />
-          <span className="text-slate-900">Hồ sơ kênh</span>
+    <div className="mx-auto w-full max-w-[1440px] space-y-7 pb-12">
+      <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-slate-500">
+            <span>Content Chốt Đơn</span>
+            <ChevronRight className="h-4 w-4 text-slate-400" />
+            <span className="text-slate-900">Hồ sơ kênh</span>
+          </div>
+
+          <div>
+            <h1 className="text-3xl font-black tracking-[-0.04em] text-slate-950 sm:text-4xl">
+              Hồ sơ kênh
+            </h1>
+            <p className="mt-2 max-w-3xl text-base font-medium leading-7 text-slate-500">
+              AI hiểu kênh của bạn để gợi ý ý tưởng và nội dung phù hợp nhất.
+            </p>
+          </div>
         </div>
 
-        <div>
-          <h1 className="text-3xl font-black tracking-[-0.04em] text-slate-950 sm:text-4xl">
-            Hồ sơ kênh
-          </h1>
-          <p className="mt-2 max-w-3xl text-base font-medium leading-7 text-slate-500">
-            Thiết lập thông tin kênh để AI hiểu rõ hơn và đưa ra gợi ý nội dung
-            phù hợp.
-          </p>
-        </div>
+        <Link
+          href="#channel-edit-section"
+          className="inline-flex h-11 w-fit items-center justify-center rounded-2xl border border-emerald-200 bg-white px-4 text-sm font-extrabold text-emerald-700 shadow-sm transition hover:border-emerald-300 hover:bg-emerald-50"
+        >
+          Chuyển đến chỉnh sửa
+        </Link>
       </header>
 
-      <div className="grid items-start gap-6 xl:grid-cols-[0.42fr_0.58fr]">
-        <section className="space-y-6">
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,0.37fr)_minmax(0,0.63fr)]">
+        <section className="min-w-0 space-y-6">
           <ChannelProfileCard channel={channel} />
-          <ChannelAiReadinessCard channel={channel} />
+          <ChannelAiReadinessCard
+            channel={channel}
+            result={positioningResult}
+          />
+        </section>
+
+        <section className="min-w-0 space-y-6">
           <ChannelPositioningAiCard
             channelId={channel?.id}
-            result={channel?.ai_positioning_result}
+            result={positioningResult}
             generatedAt={channel?.ai_positioning_generated_at}
             status={aiPositioningStatus}
             legacyAdvice={channel?.ai_positioning_advice}
           />
-          <ChannelEmptyState channel={channel} />
-        </section>
 
-        <section>
-          <ChannelProfileForm channel={channel} />
+          <ChannelStarterIdeasCard result={positioningResult} />
         </section>
       </div>
+
+      <ChannelStrategyCards result={positioningResult} />
+
+      <section id="channel-edit-section" className="scroll-mt-28 space-y-4">
+        <div className="rounded-[24px] border border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-white p-5 shadow-[0_16px_42px_rgba(15,23,42,0.045)] sm:p-6">
+          <p className="text-xs font-black uppercase tracking-[0.22em] text-emerald-600">
+            KHU VỰC CHỈNH SỬA (kéo xuống)
+          </p>
+
+          <div className="mt-2 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <h2 className="text-2xl font-black tracking-[-0.04em] text-slate-950 sm:text-3xl">
+                Chỉnh sửa hồ sơ kênh
+              </h2>
+              <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-slate-500 sm:text-base">
+                Cập nhật thông tin để AI hiểu kênh của bạn chính xác hơn.
+              </p>
+            </div>
+
+            <span className="inline-flex w-fit rounded-full bg-white px-3 py-1 text-xs font-extrabold text-slate-500 ring-1 ring-slate-200">
+              Thay đổi sẽ lưu vào Supabase
+            </span>
+          </div>
+        </div>
+
+        <ChannelProfileForm channel={channel} />
+      </section>
     </div>
   );
 }
