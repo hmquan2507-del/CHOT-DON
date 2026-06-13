@@ -90,4 +90,8 @@
 - revenue
 - notes
 - created_at
+
+channels.ai_positioning_result: lưu kết quả AI định vị kênh dạng JSON.
+channels.ai_positioning_generated_at: thời điểm AI tạo định vị gần nhất.
+
 product_imports = bảng lưu link import sản phẩm, chuẩn bị cho Smart Product Import, metadata extraction và scraping adapter sau này.
