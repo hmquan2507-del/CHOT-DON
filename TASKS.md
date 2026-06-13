@@ -2,257 +2,225 @@
 
 ## Current Phase
 
-Phase 4.4B — Product Link Metadata Extract
+Phase 4.5 — AI Product Enrichment
 
 ## Goal
 
-Upgrade Smart Product Import so the app can extract basic metadata from a pasted product/affiliate URL.
+Add AI-assisted product enrichment to Smart Product Import.
 
-The user should be able to paste a link, click a button, and the server will try to extract:
+The user should paste a product/affiliate link and optional notes. The system already attempts metadata extraction from Phase 4.4B. In this phase, AI will use the available metadata, pasted URL, user notes, and channel profile context to suggest richer product fields.
 
-- title
-- description
-- image URL
-- source domain
+The user must review and confirm before saving the final product.
 
-If metadata is found, prefill the ProductForm with:
+## Existing Flow
 
-- name = extracted title
-- notes = extracted description or user notes
-- affiliate_url = pasted URL
+Phase 4.4A:
 
-If metadata fails, the flow must still work like Phase 4.4A.
+* User pastes product/affiliate URL.
+* ProductForm opens with affiliate_url and notes prefilled.
 
-## Current Existing Flow
+Phase 4.4B:
 
-Phase 4.4A already works:
+* Server attempts metadata extraction.
+* ProductForm can be prefilled with name, notes, affiliate_url.
+* If metadata fails, fallback still works.
 
-1. User pastes a product/affiliate URL.
-2. User adds optional notes.
-3. User opens a Sheet.
-4. ProductForm is prefilled with affiliate_url and notes.
-5. User fills remaining fields and saves product to Supabase.
-
-Do not break this existing flow.
-
-## New Flow for Phase 4.4B
+## New Flow for Phase 4.5
 
 1. User goes to `/app/products`.
-2. User sees `Nhập sản phẩm bằng link`.
-3. User pastes a product/affiliate URL.
+2. User uses `Nhập sản phẩm bằng link`.
+3. User pastes product/affiliate URL.
 4. User optionally adds notes.
-5. User clicks `Lấy thông tin sản phẩm` or `Tạo bản nháp sản phẩm`.
-6. Server-side action attempts to extract metadata from the URL.
-7. If successful:
-   - name is prefilled from metadata title.
-   - notes is prefilled from metadata description plus optional user notes.
-   - affiliate_url is prefilled with pasted URL.
+5. User clicks `Lấy thông tin sản phẩm`.
+6. Server extracts metadata if possible.
+7. User can click `AI gợi ý thông tin bán hàng` or the import flow can automatically run enrichment after metadata extraction.
+8. AI returns suggested product fields.
+9. ProductForm opens with AI-enriched default values.
+10. User reviews and edits all fields.
+11. User saves final product into existing `products` table.
 
-8. If failed:
-   - affiliate_url is still prefilled.
-   - notes uses user notes.
-   - UI shows a subtle warning/helper text.
+## AI Provider
 
-9. User reviews and saves final product into `products`.
+Use server-side AI only.
 
-## Important Product Rule
+Preferred for this phase:
 
-Metadata is only a helper.
+* OpenAI API if OPENAI_API_KEY is available
+* Or Gemini API if GEMINI_API_KEY is already used in the project
 
-The final confirmed product data must still be saved to the existing `products` table after user confirmation.
+Do not call AI from client components.
 
-Do not directly create a product from metadata without user review.
+Do not expose API keys in frontend.
+
+## Important Product Rules
+
+AI can suggest:
+
+* product name
+* category
+* strengths
+* target_customer
+* notes
+* content angles
+* hook ideas
+* CTA ideas
+
+AI must not invent:
+
+* price
+* commission
+* affiliate URL
+* image URL
+* fake reviews
+* medical/health claims
+* guaranteed results
+* platform policy claims
+
+If price/commission are not available, leave them empty.
+
+## Data Sources for AI
+
+AI input should include:
+
+* pasted product URL
+* source domain
+* metadata title
+* metadata description
+* user notes
+* current channel profile if available
+* existing product fields if any
+
+## Output Shape
+
+AI should return structured JSON.
+
+Suggested type:
+
+```ts
+export type AIProductEnrichmentResult = {
+  name: string;
+  category: string;
+  strengths: string;
+  target_customer: string;
+  notes: string;
+  content_angles: string[];
+  hook_examples: string[];
+  cta_examples: string[];
+  confidence: "high" | "medium" | "low";
+};
+```
 
 ## Database
 
-Use existing `product_imports` table if available.
+No database schema change is required for this phase.
 
-Expected useful fields:
+Use existing tables:
 
-- user_id
-- channel_id
-- source_url
-- source_domain
-- status
-- raw_title
-- raw_description
-- raw_image_url
-- raw_metadata
-- user_notes
-- error_message
-- created_product_id
+* products
+* product_imports
+* channels
 
-For Phase 4.4B:
+Optional:
 
-- Create an import record when user attempts metadata extraction.
-- Store extracted metadata if available.
-- Store error_message if metadata extraction fails.
-- Do not block the user if extraction fails.
-
-## Status Values
-
-Use these statuses:
-
-- pending: extraction started
-- succeeded: metadata extracted
-- failed: extraction failed
-- needs_review: partial metadata found
-- converted: user saved final product
+* If ai_runs table already exists, log AI run.
+* If ai_runs does not exist, do not create it in this phase unless explicitly requested.
 
 ## Not In Scope
 
 Do not implement:
 
-- Shopee/TikTok Shop deep scraping
-- Browser automation
-- Playwright
-- Puppeteer
-- Proxy scraping
-- CAPTCHA bypass
-- AI enrichment
-- Gemini/OpenAI API
-- Image generation
-- Video generation
-- BYOK
-- Billing/credits
-- New database schema beyond existing `product_imports`
+* Product scraping adapter 4.4C
+* Playwright
+* Puppeteer
+* CAPTCHA bypass
+* Proxy scraping
+* Image generation
+* Video generation
+* BYOK
+* Billing/credits
+* Route refactor
+* Workspace/multi-tenant refactor
+* Database schema migration unless absolutely required
 
 ## Allowed Files
 
 You may modify:
 
-- app/app/products/page.tsx
-- components/app/products/ProductImportCard.tsx
-- components/app/products/ProductForm.tsx only if needed
-- actions/product-imports.ts
-- types/product-import.ts
-- lib/product-import/\*
-- types/product.ts only if absolutely needed
+* actions/product-imports.ts
+* components/app/products/ProductImportCard.tsx
+* components/app/products/ProductForm.tsx only if needed
+* lib/product-import/*
+* types/product-import.ts
+* lib/ai/* if already exists
 
 You may create:
 
-- actions/product-imports.ts
-- types/product-import.ts
-- lib/product-import/extract-metadata.ts
-- lib/product-import/url.ts
+* lib/ai/product-enrichment.ts
+* lib/ai/schemas/product-enrichment.ts
+* lib/ai/prompts/product-enrichment.ts
+* types/ai-product-enrichment.ts
 
 ## Forbidden Files
 
 Do not modify:
 
-- app/page.tsx
-- components/landing/\*
-- app/(auth)/\*
-- components/auth/\*
-- app/app/channel/\*
-- actions/channels.ts
-- lib/supabase/\*
-- database schema
-- package.json unless absolutely required
-
-## Metadata Extraction Requirements
-
-Create a server-side metadata extraction utility.
-
-It should:
-
-1. Validate URL.
-2. Normalize URL.
-3. Detect source domain.
-4. Fetch the page server-side.
-5. Parse basic metadata from returned HTML:
-   - og:title
-   - og:description
-   - og:image
-   - twitter:title
-   - twitter:description
-   - twitter:image
-   - title
-   - meta name="description"
-
-6. Return a clean result object.
-
-Suggested result type:
-
-```ts
-export type ProductMetadataResult = {
-  sourceUrl: string;
-  sourceDomain: string | null;
-  title: string | null;
-  description: string | null;
-  imageUrl: string | null;
-  rawMetadata: Record<string, string>;
-};
-```
-
-## Fallback Rule
-
-If metadata extraction fails, do not break the import flow.
-
-Fallback values:
-
-- affiliate_url = pasted URL
-- notes = user notes
-- name = empty
-
-Show helper message:
-
-`Không lấy được thông tin tự động. Bạn vẫn có thể nhập thủ công và lưu sản phẩm.`
+* app/page.tsx
+* components/landing/*
+* app/(auth)/*
+* components/auth/*
+* app/app/channel/*
+* actions/channels.ts
+* actions/products.ts unless absolutely required
+* lib/supabase/*
+* database schema
+* package.json unless absolutely required
+* next.config.ts unless absolutely required
 
 ## UI Requirements
 
-ProductImportCard should remain clean and professional.
+ProductImportCard should show:
 
-Add loading state:
+* URL input
+* Notes textarea
+* Button: `Lấy thông tin sản phẩm`
+* AI enrichment state:
 
-- Button text while extracting: `Đang lấy thông tin...`
+  * `AI đang gợi ý thông tin...`
+  * `AI đã gợi ý xong. Vui lòng kiểm tra trước khi lưu.`
+  * `AI chưa thể gợi ý. Bạn vẫn có thể nhập thủ công.`
 
-Add success state:
+The final ProductForm should be prefilled with:
 
-- `Đã lấy được thông tin cơ bản. Vui lòng kiểm tra trước khi lưu.`
+* affiliate_url from pasted URL
+* name from metadata or AI
+* notes from metadata/user notes/AI
+* category from AI
+* strengths from AI
+* target_customer from AI
 
-Add fallback state:
+Keep current Product Library UI style.
 
-- `Không lấy được thông tin tự động. Bạn vẫn có thể nhập thủ công.`
-
-Keep current Product Library layout.
-
-Do not redesign the whole page.
-
-## ProductForm Requirements
-
-ProductForm must still support:
-
-1. Normal create mode.
-2. Create mode with defaultValues from import.
-3. Edit mode from Phase 4.3.
-
-Priority rule:
-
-- If product exists, use product values.
-- Else if defaultValues exists, use defaultValues.
-- Else empty create form.
-
-Do not break existing add/edit/delete flows.
+Do not redesign the entire page.
 
 ## Technical Rules
 
-- Do not use localStorage.
-- Do not call third-party APIs from client components.
-- Metadata fetch must run server-side.
-- Do not call AI APIs in this phase.
-- Do not scrape with Playwright/Puppeteer.
-- Keep TypeScript clean.
-- Keep mobile responsive.
-- Run `npm run build` after changes.
+* Do not use localStorage.
+* AI must run server-side only.
+* Validate AI output before using it.
+* Fallback must work if AI fails.
+* User must always be able to manually edit before saving.
+* Existing add/edit/delete product flows must continue working.
+* Existing 4.4A and 4.4B import flows must continue working.
+* Run `npm run build` after changes.
 
 ## Success Criteria
 
-- User can paste a URL.
-- Server attempts metadata extraction.
-- If metadata is found, ProductForm opens with name/notes/affiliate_url prefilled.
-- If metadata fails, ProductForm still opens with affiliate_url/notes.
-- Existing add product flow still works.
-- Existing edit product flow still works.
-- Existing delete product flow still works.
-- `npm run build` passes.
+* User can paste URL.
+* Metadata extraction still works.
+* AI enrichment suggests category, strengths, target_customer, notes.
+* ProductForm opens with AI-enriched fields.
+* User can edit fields before saving.
+* Product saves to Supabase products.
+* Existing add/edit/delete product flows still work.
+* If AI key is missing or API fails, fallback still works.
+* `npm run build` passes.
