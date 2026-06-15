@@ -25,7 +25,7 @@ export default function ContentIdeasList({
   const productMap = new Map(products.map((product) => [product.id, product]));
 
   return (
-    <section className="grid gap-5 lg:grid-cols-2">
+    <section className="grid gap-4 lg:grid-cols-2">
       {ideas.map((idea) => (
         <ContentIdeaCard
           key={idea.id}

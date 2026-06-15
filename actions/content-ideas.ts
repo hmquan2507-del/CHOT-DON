@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { generateContentIdeasWithAI } from "@/lib/ai/content-ideas";
 import type { AIChannelPositioningResult } from "@/types/ai-channel-positioning";
+import { redirect } from "next/navigation";
 import type {
   AIContentIdea,
   AIContentIdeaConfidence,
@@ -30,6 +31,10 @@ type SaveGeneratedIdeasInput = {
   confidence: AIContentIdeaConfidence;
 };
 
+export type UpdateContentIdeaStatusActionResult = {
+  success: boolean;
+  message: string;
+};
 type ChannelContextRow = {
   id: string;
   name: string | null;
@@ -306,4 +311,73 @@ priority: normalizeContentIdeaPriority(idea.priority),
     message: `Đã lưu ${rows.length} ý tưởng vào thư viện.`,
     savedCount: rows.length,
   };
+}
+
+export async function updateContentIdeaStatusAction(
+  ideaId: string,
+  status: "draft" | "ready_for_script" | "archived",
+): Promise<UpdateContentIdeaStatusActionResult> {
+  const { supabase, user, error } = await getAuthenticatedUser();
+
+  if (error || !user) {
+    return {
+      success: false,
+      message: "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.",
+    };
+  }
+
+  if (!ideaId) {
+    return {
+      success: false,
+      message: "Không tìm thấy ý tưởng cần cập nhật.",
+    };
+  }
+
+  const { error: updateError } = await supabase
+    .from("content_ideas")
+    .update({
+      status,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", ideaId)
+    .eq("user_id", user.id);
+
+  if (updateError) {
+    console.error("Error updating content idea status:", {
+      code: updateError.code,
+      message: updateError.message,
+      details: updateError.details,
+      hint: updateError.hint,
+    });
+
+    return {
+      success: false,
+      message: "Không thể cập nhật trạng thái ý tưởng.",
+    };
+  }
+
+  revalidatePath("/app/ideas");
+  revalidatePath("/app");
+
+  if (status === "ready_for_script") {
+    redirect("/app/ideas?tab=ready");
+  }
+
+  if (status === "archived") {
+    redirect("/app/ideas?tab=archived");
+  }
+
+  redirect("/app/ideas?tab=all");
+}
+
+export async function markContentIdeaReadyAction(
+  ideaId: string,
+): Promise<void> {
+  await updateContentIdeaStatusAction(ideaId, "ready_for_script");
+}
+
+export async function archiveContentIdeaAction(
+  ideaId: string,
+): Promise<void> {
+  await updateContentIdeaStatusAction(ideaId, "archived");
 }
