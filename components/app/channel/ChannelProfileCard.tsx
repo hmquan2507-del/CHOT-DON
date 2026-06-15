@@ -13,8 +13,8 @@ import type { ChannelProfile } from "@/app/app/channel/page";
 
 type ChannelProfileCardProps = {
   channel: ChannelProfile | null;
+  onEditProfile?: () => void;
 };
-
 function safeValue(value?: string | null, fallback = "Chưa cập nhật") {
   return value?.trim() || fallback;
 }
@@ -54,6 +54,7 @@ function getProfileScore(channel: ChannelProfile | null) {
 
 export default function ChannelProfileCard({
   channel,
+   onEditProfile,
 }: ChannelProfileCardProps) {
   const channelName = safeValue(channel?.name, "Kênh của bạn");
   const profileScore = getProfileScore(channel);
@@ -152,7 +153,14 @@ export default function ChannelProfileCard({
             className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
             aria-label="Chỉnh sửa hồ sơ"
           >
-            <Pencil className="h-4 w-4" />
+           <button
+  type="button"
+  onClick={onEditProfile}
+  className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-all duration-200 ease-out hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30 active:scale-[0.98]"
+  aria-label="Chỉnh sửa hồ sơ"
+>
+  <Pencil className="h-4 w-4" />
+</button>
           </a>
         </div>
 
@@ -175,23 +183,25 @@ export default function ChannelProfileCard({
           {description}
         </p>
 
-        <div className="mt-5 flex flex-col gap-2 sm:flex-row">
-          <a
-            href="#channel-edit-section"
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 text-sm font-extrabold text-white shadow-[0_14px_34px_rgba(16,185,129,0.22)] transition hover:bg-emerald-700"
-          >
-            <Pencil className="h-4 w-4" />
-            Chỉnh sửa hồ sơ
-          </a>
+     <div className="mt-5 flex flex-col gap-2 sm:flex-row">
+  <button
+    type="button"
+    onClick={onEditProfile}
+    className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 text-sm font-extrabold text-white shadow-[0_14px_34px_rgba(16,185,129,0.22)] transition-all duration-200 ease-out hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30 active:scale-[0.98]"
+  >
+    <Pencil className="h-4 w-4" />
+    Chỉnh sửa hồ sơ
+  </button>
 
-          <a
-            href="#channel-edit-section"
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-extrabold text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
-          >
-            <ArrowDown className="h-4 w-4" />
-            Kéo xuống để chỉnh sửa
-          </a>
-        </div>
+  <button
+    type="button"
+    onClick={onEditProfile}
+    className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-extrabold text-slate-600 transition-all duration-200 ease-out hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30 active:scale-[0.98]"
+  >
+    <ArrowDown className="h-4 w-4" />
+    Kéo xuống để chỉnh sửa
+  </button>
+</div>
 
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
           {summaryItems.map((item) => {

@@ -1,19 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
   BarChart3,
   Box,
   CalendarDays,
+  ChevronDown,
   Crown,
+  Edit3,
   FileText,
   Home,
   Lightbulb,
   LifeBuoy,
+  Link2,
   LogOut,
   Settings,
   Sparkles,
+  Target,
   UserCircle2,
 } from "lucide-react";
 import { logoutAction } from "@/app/(auth)/actions";
@@ -29,8 +33,38 @@ const navItems = [
   { label: "Cài đặt", icon: Settings, href: "/app/settings" },
 ];
 
+const channelSubItems = [
+  {
+    label: "Tổng quan",
+    href: "/app/channel?tab=overview",
+    tab: "overview",
+    icon: UserCircle2,
+  },
+  {
+    label: "Định vị AI",
+    href: "/app/channel?tab=positioning",
+    tab: "positioning",
+    icon: Target,
+  },
+  {
+    label: "Chỉnh sửa hồ sơ",
+    href: "/app/channel?tab=edit",
+    tab: "edit",
+    icon: Edit3,
+  },
+  {
+    label: "Liên kết kênh",
+    href: "/app/channel?tab=links",
+    tab: "links",
+    icon: Link2,
+  },
+];
+
 export default function AppSidebar() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const activeChannelTab = searchParams.get("tab") || "overview";
+  const isChannelActive = pathname === "/app/channel";
 
   return (
     <aside className="fixed left-0 top-0 z-40 hidden h-screen w-[240px] shrink-0 border-r border-[#DDEBE2] bg-white/90 backdrop-blur-xl lg:block">
@@ -65,14 +99,81 @@ export default function AppSidebar() {
         <nav className="space-y-1.5">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href;
+            const isActive =
+              item.href === "/app"
+                ? pathname === "/app"
+                : pathname.startsWith(item.href);
+
+            if (item.href === "/app/channel") {
+              return (
+                <div key={item.label} className="space-y-1">
+                  <Link
+                    href="/app/channel?tab=overview"
+                    className={[
+                      "group flex w-full cursor-pointer items-center gap-3 rounded-2xl px-3.5 py-3 text-left text-[14px] font-bold transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30 active:scale-[0.98]",
+                      isChannelActive
+                        ? "bg-[#07111F] text-white shadow-lg shadow-slate-950/10"
+                        : "text-slate-500 hover:bg-[#F3FBF5] hover:text-[#07111F]",
+                    ].join(" ")}
+                  >
+                    <Icon
+                      className={[
+                        "h-4.5 w-4.5 transition-all duration-200 ease-out",
+                        isChannelActive
+                          ? "text-emerald-300"
+                          : "text-slate-400 group-hover:text-emerald-600",
+                      ].join(" ")}
+                    />
+                    <span className="min-w-0 flex-1">{item.label}</span>
+                    <ChevronDown
+                      className={[
+                        "h-4 w-4 transition-transform duration-200 ease-out",
+                        isChannelActive ? "rotate-180 text-emerald-300" : "",
+                      ].join(" ")}
+                    />
+                  </Link>
+
+                  {isChannelActive ? (
+                    <div className="ml-4 space-y-1 border-l border-emerald-100 pl-3">
+                      {channelSubItems.map((subItem) => {
+                        const SubIcon = subItem.icon;
+                        const isSubActive = activeChannelTab === subItem.tab;
+
+                        return (
+                          <Link
+                            key={subItem.tab}
+                            href={subItem.href}
+                            className={[
+                              "group flex h-9 cursor-pointer items-center gap-2 rounded-xl px-3 text-[13px] font-extrabold transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30 active:scale-[0.98]",
+                              isSubActive
+                                ? "bg-emerald-50 text-emerald-700"
+                                : "text-slate-500 hover:bg-emerald-50 hover:text-emerald-700",
+                            ].join(" ")}
+                          >
+                            <SubIcon
+                              className={[
+                                "h-3.5 w-3.5 transition-colors",
+                                isSubActive
+                                  ? "text-emerald-600"
+                                  : "text-slate-400 group-hover:text-emerald-600",
+                              ].join(" ")}
+                            />
+                            {subItem.label}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  ) : null}
+                </div>
+              );
+            }
 
             return (
               <Link
                 key={item.label}
                 href={item.href}
                 className={[
-                  "group flex w-full items-center gap-3 rounded-2xl px-3.5 py-3 text-left text-[14px] font-bold transition",
+                  "group flex w-full cursor-pointer items-center gap-3 rounded-2xl px-3.5 py-3 text-left text-[14px] font-bold transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30 active:scale-[0.98]",
                   isActive
                     ? "bg-[#07111F] text-white shadow-lg shadow-slate-950/10"
                     : "text-slate-500 hover:bg-[#F3FBF5] hover:text-[#07111F]",
@@ -80,7 +181,7 @@ export default function AppSidebar() {
               >
                 <Icon
                   className={[
-                    "h-4.5 w-4.5 transition",
+                    "h-4.5 w-4.5 transition-all duration-200 ease-out",
                     isActive
                       ? "text-emerald-300"
                       : "text-slate-400 group-hover:text-emerald-600",
@@ -113,7 +214,7 @@ export default function AppSidebar() {
           <form action={logoutAction}>
             <button
               type="submit"
-              className="flex w-full items-center gap-3 rounded-2xl px-3.5 py-3 text-left text-[14px] font-bold text-slate-500 transition hover:bg-red-50 hover:text-red-600"
+              className="flex w-full cursor-pointer items-center gap-3 rounded-2xl px-3.5 py-3 text-left text-[14px] font-bold text-slate-500 transition-all duration-200 ease-out hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/20 active:scale-[0.98]"
             >
               <LogOut className="h-4.5 w-4.5" />
               <span>Đăng xuất</span>

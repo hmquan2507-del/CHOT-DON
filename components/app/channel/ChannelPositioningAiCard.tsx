@@ -304,7 +304,7 @@ export function ChannelPositioningAiCard({
           <form action={generateChannelPositioningAction.bind(null, channelId)}>
             <button
               type="submit"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 text-sm font-extrabold text-white shadow-[0_14px_34px_rgba(16,185,129,0.22)] transition hover:bg-emerald-700"
+             className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 text-sm font-extrabold text-white shadow-[0_14px_34px_rgba(16,185,129,0.22)] transition-all duration-200 ease-out hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30 active:scale-[0.98]"
             >
               {hasResult ? (
                 <>
@@ -370,7 +370,7 @@ export function ChannelStarterIdeasCard({
 
                   <button
                     type="button"
-                    className="hidden h-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-xs font-extrabold text-slate-600 transition hover:bg-slate-50 sm:inline-flex"
+                   className="hidden h-9 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-xs font-extrabold text-slate-600 transition-all duration-200 ease-out hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30 active:scale-[0.98] sm:inline-flex"
                   >
                     Xem gợi ý
                   </button>
