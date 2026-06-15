@@ -42,10 +42,11 @@ type ChannelPositioningRow = {
   facebook_url: string | null;
 };
 
-function redirectWithPositioningStatus(status: "succeeded" | "missing_key" | "failed"): never {
-  redirect(`/app/channel?ai_positioning=${status}`);
+function redirectWithPositioningStatus(
+  status: "succeeded" | "missing_key" | "failed",
+): never {
+  redirect(`/app/channel?tab=positioning&ai_positioning=${status}`);
 }
-
 export async function createChannel(formData: FormData) {
   const supabase = await createClient();
 

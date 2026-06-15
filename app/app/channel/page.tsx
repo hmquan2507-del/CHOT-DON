@@ -167,7 +167,7 @@ export default async function ChannelPage({ searchParams }: ChannelPageProps) {
         </div>
       </header>
 
-      <div className="overflow-x-auto rounded-[24px] border border-slate-200/80 bg-white p-2 shadow-[0_14px_36px_rgba(15,23,42,0.045)]">
+<div className="overflow-x-auto rounded-[24px] border border-slate-200/80 bg-white p-2 shadow-[0_14px_36px_rgba(15,23,42,0.045)] lg:hidden">        
         <div className="flex min-w-max gap-2">
           {tabItems.map((item) => {
             const Icon = item.icon;
@@ -233,19 +233,20 @@ function OverviewTab({
   positioningResult: AIChannelPositioningResult | null;
 }) {
   return (
-    <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,0.38fr)_minmax(0,0.62fr)]">
-      <section className="min-w-0 space-y-6">
+    <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,0.45fr)_minmax(0,0.55fr)]">
+      <section className="min-w-0">
         <ChannelProfileCard channel={channel} />
-        <ChannelAiReadinessCard channel={channel} result={positioningResult} />
       </section>
 
-      <section className="min-w-0 space-y-6">
+      <section className="min-w-0 space-y-5">
+        <ChannelAiReadinessCard channel={channel} result={positioningResult} />
+
         <CompactOverviewCard channel={channel} />
 
         <div className="grid gap-3 sm:grid-cols-2">
           <Link
             href="/app/channel?tab=edit"
-            className="inline-flex h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 text-sm font-extrabold text-white shadow-[0_14px_34px_rgba(16,185,129,0.22)] transition-all duration-200 ease-out hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30 active:scale-[0.98]"
+            className="inline-flex h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 text-sm font-extrabold text-white shadow-[0_14px_34px_rgba(16,185,129,0.22)] transition-all duration-200 ease-out hover:bg-emerald-700 hover:shadow-[0_18px_42px_rgba(16,185,129,0.28)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30 active:scale-[0.98]"
           >
             <Edit3 className="h-4 w-4" />
             Chỉnh sửa hồ sơ
