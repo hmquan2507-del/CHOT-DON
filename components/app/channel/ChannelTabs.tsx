@@ -117,10 +117,7 @@ export default function ChannelTabs({
       {activeTab === "overview" ? (
         <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,0.38fr)_minmax(0,0.62fr)]">
           <section className="min-w-0 space-y-6">
-            <ChannelProfileCard
-              channel={channel}
-              onEditProfile={() => setActiveTab("edit")}
-            />
+          <ChannelProfileCard channel={channel} />
 
             <ChannelAiReadinessCard
               channel={channel}

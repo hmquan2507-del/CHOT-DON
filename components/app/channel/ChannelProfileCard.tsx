@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   ArrowDown,
   Camera,
@@ -13,8 +14,8 @@ import type { ChannelProfile } from "@/app/app/channel/page";
 
 type ChannelProfileCardProps = {
   channel: ChannelProfile | null;
-  onEditProfile?: () => void;
 };
+
 function safeValue(value?: string | null, fallback = "Chưa cập nhật") {
   return value?.trim() || fallback;
 }
@@ -52,10 +53,7 @@ function getProfileScore(channel: ChannelProfile | null) {
   return Math.max(35, Math.round((completed / fields.length) * 100));
 }
 
-export default function ChannelProfileCard({
-  channel,
-   onEditProfile,
-}: ChannelProfileCardProps) {
+export default function ChannelProfileCard({ channel }: ChannelProfileCardProps) {
   const channelName = safeValue(channel?.name, "Kênh của bạn");
   const profileScore = getProfileScore(channel);
 
@@ -101,7 +99,7 @@ export default function ChannelProfileCard({
 
   return (
     <section className="overflow-hidden rounded-[24px] border border-slate-200/80 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
-      <div className="relative h-[118px] overflow-hidden bg-[linear-gradient(135deg,#10B981_0%,#35D0B3_48%,#BDF7E7_100%)]">
+      <div className="relative h-[112px] overflow-hidden bg-[linear-gradient(135deg,#10B981_0%,#35D0B3_48%,#BDF7E7_100%)]">
         <div className="absolute inset-0 opacity-35 [background-image:linear-gradient(135deg,rgba(255,255,255,0.55)_1px,transparent_1px)] [background-size:16px_16px]" />
         <div className="absolute -right-12 -top-20 h-56 w-56 rounded-full border border-white/35" />
         <div className="absolute -right-24 -top-28 h-72 w-72 rounded-full border border-white/25" />
@@ -148,20 +146,13 @@ export default function ChannelProfileCard({
             {getStatusLabel(channel?.channel_status)}
           </span>
 
-          <a
-            href="#channel-edit-section"
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
+          <Link
+            href="/app/channel?tab=edit"
+            className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-all duration-200 ease-out hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30 active:scale-[0.98]"
             aria-label="Chỉnh sửa hồ sơ"
           >
-           <button
-  type="button"
-  onClick={onEditProfile}
-  className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-all duration-200 ease-out hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30 active:scale-[0.98]"
-  aria-label="Chỉnh sửa hồ sơ"
->
-  <Pencil className="h-4 w-4" />
-</button>
-          </a>
+            <Pencil className="h-4 w-4" />
+          </Link>
         </div>
 
         <div className="mt-3 flex flex-wrap gap-1.5">
@@ -183,25 +174,23 @@ export default function ChannelProfileCard({
           {description}
         </p>
 
-     <div className="mt-5 flex flex-col gap-2 sm:flex-row">
-  <button
-    type="button"
-    onClick={onEditProfile}
-    className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 text-sm font-extrabold text-white shadow-[0_14px_34px_rgba(16,185,129,0.22)] transition-all duration-200 ease-out hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30 active:scale-[0.98]"
-  >
-    <Pencil className="h-4 w-4" />
-    Chỉnh sửa hồ sơ
-  </button>
+        <div className="mt-5 flex flex-col gap-2 sm:flex-row">
+          <Link
+            href="/app/channel?tab=edit"
+            className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 text-sm font-extrabold text-white shadow-[0_14px_34px_rgba(16,185,129,0.22)] transition-all duration-200 ease-out hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30 active:scale-[0.98]"
+          >
+            <Pencil className="h-4 w-4" />
+            Chỉnh sửa hồ sơ
+          </Link>
 
-  <button
-    type="button"
-    onClick={onEditProfile}
-    className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-extrabold text-slate-600 transition-all duration-200 ease-out hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30 active:scale-[0.98]"
-  >
-    <ArrowDown className="h-4 w-4" />
-    Kéo xuống để chỉnh sửa
-  </button>
-</div>
+          <Link
+            href="/app/channel?tab=links"
+            className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-extrabold text-slate-600 transition-all duration-200 ease-out hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30 active:scale-[0.98]"
+          >
+            <ArrowDown className="h-4 w-4" />
+            Liên kết kênh
+          </Link>
+        </div>
 
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
           {summaryItems.map((item) => {
