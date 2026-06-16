@@ -1,7 +1,14 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Link from "next/link";
-import { PackagePlus, Pencil, Sparkles } from "lucide-react";
+import {
+  BadgeCheck,
+  PackagePlus,
+  Pencil,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
 import { createProduct, updateProduct } from "@/actions/products";
 import ProductSubmitButton from "./ProductSubmitButton";
 import type { Product } from "@/types/product";
@@ -31,10 +38,10 @@ type ProductFormProps = {
 };
 
 const inputClassName =
-  "h-11 w-full rounded-2xl border border-[#DDE6EC] bg-white px-4 text-sm font-semibold text-slate-900 outline-none transition-all duration-200 ease-out placeholder:text-slate-400 hover:border-emerald-200 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100";
+  "h-11 w-full rounded-2xl border border-[#DDE6EC] bg-white px-4 text-sm font-semibold text-slate-900 outline-none transition-all duration-200 ease-out placeholder:text-slate-400 hover:border-emerald-200 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30";
 
 const textareaClassName =
-  "min-h-[86px] w-full resize-none rounded-2xl border border-[#DDE6EC] bg-white px-4 py-3 text-sm font-semibold leading-6 text-slate-900 outline-none transition-all duration-200 ease-out placeholder:text-slate-400 hover:border-emerald-200 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100";
+  "min-h-[88px] w-full resize-none rounded-2xl border border-[#DDE6EC] bg-white px-4 py-3 text-sm font-semibold leading-6 text-slate-900 outline-none transition-all duration-200 ease-out placeholder:text-slate-400 hover:border-emerald-200 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30";
 
 const labelClassName = "mb-2 block text-[13px] font-extrabold text-slate-700";
 
@@ -46,8 +53,8 @@ export default function ProductForm({
   const isEditing = Boolean(product);
 
   return (
-    <section className="overflow-hidden rounded-[24px] border border-slate-200/80 bg-white shadow-[0_18px_40px_rgba(15,23,42,0.055)]">
-      <div className="border-b border-slate-100 bg-gradient-to-br from-slate-50 via-white to-emerald-50/40 px-5 py-5 sm:px-6">
+    <section className="overflow-hidden rounded-[24px] border border-slate-200/80 bg-white shadow-[0_18px_42px_rgba(15,23,42,0.055)]">
+      <div className="border-b border-slate-100 bg-white px-5 py-5 sm:px-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-emerald-100 bg-emerald-50 text-emerald-600 shadow-sm">
@@ -59,7 +66,7 @@ export default function ProductForm({
             </div>
 
             <div>
-              <h2 className="text-[20px] font-black tracking-[-0.03em] text-slate-950">
+              <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950">
                 {isEditing ? "Chỉnh sửa sản phẩm" : "Thông tin sản phẩm"}
               </h2>
               <p className="mt-1 text-sm font-medium leading-6 text-slate-500">
@@ -70,7 +77,7 @@ export default function ProductForm({
             </div>
           </div>
 
-          <div className="flex w-fit items-center gap-2 rounded-full border border-emerald-100 bg-white px-3 py-1.5 text-xs font-extrabold text-emerald-700 shadow-sm">
+          <div className="flex w-fit items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5 text-xs font-extrabold text-emerald-700">
             <Sparkles className="h-3.5 w-3.5" />
             Dữ liệu cho AI
           </div>
@@ -84,7 +91,7 @@ export default function ProductForm({
       >
         <div className="space-y-5 p-5 sm:p-6">
           <FormGroup
-            marker="A"
+            number="1"
             title="Thông tin chính"
             description="Tên, kênh liên kết, giá và phân loại sản phẩm."
           >
@@ -106,26 +113,15 @@ export default function ProductForm({
                 </select>
               </Field>
 
-              <Field label="Ngách / Phân loại">
+              <Field label="Tên sản phẩm" required>
                 <input
-                  name="category"
-                  defaultValue={product?.category ?? defaultValues?.category ?? ""}
-                  placeholder="Vd: Skincare, Gia dụng..."
+                  name="name"
+                  required
+                  defaultValue={product?.name ?? defaultValues?.name ?? ""}
+                  placeholder="Nhập tên sản phẩm..."
                   className={inputClassName}
                 />
               </Field>
-
-              <div className="lg:col-span-2">
-                <Field label="Tên sản phẩm" required>
-                  <input
-                    name="name"
-                    required
-                    defaultValue={product?.name ?? defaultValues?.name ?? ""}
-                    placeholder="Nhập tên sản phẩm..."
-                    className={inputClassName}
-                  />
-                </Field>
-              </div>
 
               <Field label="Giá (VND)">
                 <input
@@ -137,15 +133,24 @@ export default function ProductForm({
                   className={inputClassName}
                 />
               </Field>
+
+              <Field label="Ngách / Phân loại">
+                <input
+                  name="category"
+                  defaultValue={product?.category ?? defaultValues?.category ?? ""}
+                  placeholder="Vd: Skincare, Gia dụng..."
+                  className={inputClassName}
+                />
+              </Field>
             </div>
           </FormGroup>
 
           <FormGroup
-            marker="B"
+            number="2"
             title="Bán hàng / Affiliate"
             description="Thông tin giúp AI biết sản phẩm nào đáng ưu tiên để chốt đơn."
           >
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className="grid gap-4 lg:grid-cols-4">
               <Field label="Hoa hồng (%)">
                 <input
                   name="commission"
@@ -158,17 +163,6 @@ export default function ProductForm({
                   placeholder="0.0"
                   className={inputClassName}
                 />
-              </Field>
-
-              <Field label="Mức độ ưu tiên">
-                <select
-                  name="priority"
-                  defaultValue={product?.priority ?? "normal"}
-                  className={`${inputClassName} cursor-pointer`}
-                >
-                  <option value="normal">Bình thường</option>
-                  <option value="high">⭐️ Ưu tiên đẩy</option>
-                </select>
               </Field>
 
               <div className="lg:col-span-2">
@@ -187,6 +181,17 @@ export default function ProductForm({
                 </Field>
               </div>
 
+              <Field label="Mức độ ưu tiên">
+                <select
+                  name="priority"
+                  defaultValue={product?.priority ?? "normal"}
+                  className={`${inputClassName} cursor-pointer`}
+                >
+                  <option value="normal">Bình thường</option>
+                  <option value="high">⭐️ Ưu tiên đẩy</option>
+                </select>
+              </Field>
+
               <Field label="Trạng thái">
                 <select
                   name="status"
@@ -202,11 +207,11 @@ export default function ProductForm({
           </FormGroup>
 
           <FormGroup
-            marker="C"
+            number="3"
             title="Dữ liệu cho AI"
             description="Càng rõ điểm mạnh và khách hàng phù hợp, AI càng tạo nội dung chính xác."
           >
-            <div className="grid gap-4">
+            <div className="grid gap-4 lg:grid-cols-2">
               <Field label="Điểm mạnh nổi bật">
                 <textarea
                   name="strengths"
@@ -231,23 +236,36 @@ export default function ProductForm({
                 />
               </Field>
 
-              <Field label="Ghi chú">
-                <textarea
-                  name="notes"
-                  defaultValue={product?.notes ?? defaultValues?.notes ?? ""}
-                  placeholder="Thông tin nội bộ, không bắt buộc..."
-                  className="min-h-[74px] w-full resize-none rounded-2xl border border-[#DDE6EC] bg-white px-4 py-3 text-sm font-semibold leading-6 text-slate-900 outline-none transition-all duration-200 ease-out placeholder:text-slate-400 hover:border-emerald-200 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100"
-                />
-              </Field>
+              <div className="lg:col-span-2">
+                <Field label="Ghi chú thêm">
+                  <textarea
+                    name="notes"
+                    defaultValue={product?.notes ?? defaultValues?.notes ?? ""}
+                    placeholder="Thông tin nội bộ, không bắt buộc..."
+                    className="min-h-[72px] w-full resize-none rounded-2xl border border-[#DDE6EC] bg-white px-4 py-3 text-sm font-semibold leading-6 text-slate-900 outline-none transition-all duration-200 ease-out placeholder:text-slate-400 hover:border-emerald-200 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30"
+                  />
+                </Field>
+              </div>
             </div>
           </FormGroup>
         </div>
 
-        <div className="border-t border-slate-100 bg-slate-50/50 px-5 py-4 sm:px-6">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <p className="text-xs font-semibold leading-5 text-slate-500">
-              Thay đổi sẽ được lưu vào Supabase và dùng làm dữ liệu nền cho AI.
-            </p>
+        <div className="border-t border-slate-100 bg-slate-50/70 px-5 py-4 sm:px-6">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+                <ShieldCheck className="h-5 w-5" />
+              </div>
+
+              <div>
+                <p className="text-sm font-black text-slate-800">
+                  Thay đổi sẽ được lưu vào Supabase
+                </p>
+                <p className="mt-0.5 text-xs font-semibold text-slate-500">
+                  Dữ liệu của bạn luôn được bảo mật.
+                </p>
+              </div>
+            </div>
 
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               {!isEditing ? (
@@ -269,27 +287,30 @@ export default function ProductForm({
 }
 
 function FormGroup({
-  marker,
+  number,
   title,
   description,
   children,
 }: {
-  marker: string;
+  number: string;
   title: string;
   description: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
-    <section className="rounded-[22px] border border-slate-100 bg-slate-50/60 p-4">
+    <section className="rounded-[22px] border border-slate-100 bg-slate-50/55 p-4 sm:p-5">
       <div className="mb-4 flex items-start gap-3">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-xs font-black text-white">
-          {marker}
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-sm font-black text-white shadow-sm shadow-emerald-600/20">
+          {number}
         </div>
 
-        <div>
-          <h3 className="text-base font-black tracking-[-0.02em] text-slate-950">
-            {title}
-          </h3>
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <h3 className="text-base font-black tracking-[-0.02em] text-slate-950">
+              {title}
+            </h3>
+            <BadgeCheck className="h-4 w-4 text-emerald-500" />
+          </div>
           <p className="mt-1 text-xs font-medium leading-5 text-slate-500">
             {description}
           </p>
@@ -308,7 +329,7 @@ function Field({
 }: {
   label: string;
   required?: boolean;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <div className="min-w-0">

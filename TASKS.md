@@ -2,62 +2,51 @@
 
 ## Current Phase
 
-Phase 6 — AI Content Ideas
+Phase 6.2 — Ideas Management Features
 
 ## Goal
 
-Create the Content Ideas module.
+Hoàn thiện module `/app/ideas` để người dùng có thể quản lý ý tưởng nội dung thật sự hiệu quả trước khi chuyển sang Phase 7 — AI Script Generator.
 
-The user should be able to generate short-video content ideas using AI based on:
+Phase này tập trung vào:
 
-* Channel Profile
-* AI Channel Positioning result
-* Product Library
-* Product AI enrichment data if available
-* User-selected product
-* User-selected goal/platform
+* Tìm kiếm ý tưởng
+* Lọc ý tưởng
+* Sắp xếp ý tưởng
+* Đánh dấu ý tưởng sẵn sàng viết kịch bản
+* Lưu trữ ý tưởng
+* Khôi phục ý tưởng đã lưu trữ
+* Làm UI quản lý ý tưởng rõ ràng, dễ dùng, không rối
 
-The generated ideas must be reviewed by the user and saved into Supabase `content_ideas`.
+Không triển khai AI Script Generator trong phase này.
 
-## Existing Completed Phases
+---
+
+## Current Status
+
+Đã hoàn thành:
 
 * Phase 3 — Channel Profile
-* Phase 4.3 — Product Library edit/delete + dashboard product count
-* Phase 4.4A — Product link import draft flow
-* Phase 4.4B — Product metadata extraction
-* Phase 4.5A — AI Product Enrichment Foundation
+* Phase 4 — Product Library
+* Phase 4.4 — Product Import by Link
+* Phase 4.5 — AI Product Enrichment
 * Phase 5 — AI Channel Positioning
+* Phase 6 — AI Content Ideas
+* `/app/ideas` đã có UI và lưu ý tưởng vào Supabase
+* Sidebar đã có submenu cho Ideas
+* Ideas UI đã được polish cơ bản
 
-## User Flow
+Hiện cần hoàn thiện phần quản lý dữ liệu trong Ideas.
 
-1. User goes to `/app/ideas`.
-2. Page shows current ideas from Supabase.
-3. User clicks `Tạo ý tưởng bằng AI`.
-4. User selects:
-
-   * Channel
-   * Product optional
-   * Platform
-   * Goal
-   * Number of ideas
-5. Server reads:
-
-   * current user
-   * selected channel
-   * channel.ai_positioning_result
-   * selected product if any
-   * recent products if no product selected
-6. AI generates structured content ideas.
-7. UI shows preview list.
-8. User can save selected ideas.
-9. Saved ideas are inserted into `content_ideas`.
-10. Ideas remain after refresh.
+---
 
 ## Database
 
-Use table `content_ideas`.
+Dùng bảng hiện có:
 
-Required fields:
+`content_ideas`
+
+Các field chính:
 
 * id
 * user_id
@@ -81,256 +70,364 @@ Required fields:
 * created_at
 * updated_at
 
-If table does not exist, ask user to run the approved SQL migration before coding.
+Không thêm cột mới trong phase này.
 
-## AI Output
+---
 
-AI should return structured JSON.
+## Required Features
 
-Suggested type:
+### 1. Search Ideas
 
-```ts
-export type AIContentIdea = {
-  title: string;
-  hook: string;
-  angle: string;
-  platform: string;
-  content_format: string;
-  goal: string;
-  target_audience: string;
-  cta: string;
-  hashtags: string[];
-  notes: string;
-  priority: "low" | "normal" | "high";
-  reason: string;
-};
+Thêm ô tìm kiếm:
 
-export type AIContentIdeasResult = {
-  ideas: AIContentIdea[];
-  confidence: "high" | "medium" | "low";
-};
-```
+Placeholder:
 
-## AI Rules
+`Tìm ý tưởng, hook, CTA...`
 
-AI can generate:
-
-* video idea title
-* hook
-* content angle
-* content format
-* CTA
-* hashtag suggestions
-* notes
-* reason why this idea fits the channel/product
-
-AI must not:
-
-* invent fake product claims
-* invent fake reviews
-* promise guaranteed results
-* create misleading medical/health claims
-* create platform policy claims
-* generate full video script in this phase
-
-Full scripts belong to Phase 7.
-
-## AI Provider
-
-Use the same provider strategy already used in Phase 4.5A / Phase 5.
-
-* Gemini if GEMINI_API_KEY is configured
-* OpenAI if OPENAI_API_KEY is configured
-* Server-side only
-* Never expose API keys in client components
-
-If no API key exists:
-
-* Do not crash
-* Show friendly message:
-  `Chưa cấu hình API key AI. Vui lòng thêm GEMINI_API_KEY hoặc OPENAI_API_KEY.`
-
-## Not In Scope
-
-Do not implement:
-
-* AI Script Generator
-* Content Calendar
-* Metrics
-* AI Image Generation
-* AI Video Generation
-* Product scraping adapter 4.4C
-* BYOK
-* Billing/credits
-* Route refactor
-* Workspace/multi-tenant refactor
-* Database redesign
-
-## Allowed Files
-
-You may modify:
-
-* app/app/ideas/page.tsx
-* components/app/ideas/*
-* actions/content-ideas.ts
-* types/content-idea.ts
-* lib/ai/*
-
-You may create:
-
-* actions/content-ideas.ts
-* types/content-idea.ts
-* types/ai-content-ideas.ts
-* lib/ai/content-ideas.ts
-* lib/ai/prompts/content-ideas.ts
-* lib/ai/schemas/content-ideas.ts
-* components/app/ideas/ContentIdeaCard.tsx
-* components/app/ideas/ContentIdeasList.tsx
-* components/app/ideas/ContentIdeaGenerator.tsx
-* components/app/ideas/ContentIdeasEmptyState.tsx
-* components/app/ideas/ContentIdeaSaveButton.tsx if needed
-
-## Forbidden Files
-
-Do not modify:
-
-* app/page.tsx
-* components/landing/*
-* app/(auth)/*
-* components/auth/*
-* app/app/channel/* unless absolutely required
-* app/app/products/* unless absolutely required
-* actions/products.ts
-* actions/product-imports.ts
-* actions/channels.ts
-* lib/supabase/*
-* database schema except approved content_ideas table
-* package.json unless absolutely required
-* next.config.ts unless absolutely required
-
-## Page UI Requirements
-
-Route:
-
-`/app/ideas`
-
-Page layout:
-
-* Keep dashboard sidebar/topbar.
-* Page title: `Ý tưởng nội dung`
-* Subtitle: `Tạo và quản lý ý tưởng video ngắn dựa trên kênh, sản phẩm và định vị AI.`
-* Top stats cards:
-
-  * Tổng ý tưởng
-  * Ý tưởng từ AI
-  * Sẵn sàng làm kịch bản
-  * Đã lên lịch / placeholder 0 if calendar not implemented
-* Main section:
-
-  * Left: ideas list/grid
-  * Right: AI generator panel
-
-## AI Generator Panel UI
-
-Card title:
-
-`Tạo ý tưởng bằng AI`
-
-Fields:
-
-* Channel select
-* Product select optional
-* Platform select:
-
-  * TikTok
-  * YouTube Shorts
-  * Facebook Reels
-* Goal select:
-
-  * Bán hàng
-  * Affiliate
-  * Tăng nhận diện
-  * Tăng tương tác
-  * Giáo dục khách hàng
-* Number of ideas:
-
-  * 3
-  * 5
-  * 10
-
-Button:
-
-`Tạo ý tưởng`
-
-Loading state:
-
-`AI đang tạo ý tưởng...`
-
-After generation:
-
-* Show preview ideas
-* Each idea has checkbox/select
-* Button: `Lưu ý tưởng đã chọn`
-
-## Ideas List UI
-
-Each idea card should show:
+Search nên tìm trong:
 
 * title
 * hook
 * angle
-* product name if available
-* platform
-* goal
-* priority badge
-* status badge
-* CTA
+* cta
 * hashtags
-* source_type badge: AI / Thủ công
-* action button:
+* notes
 
-  * `Dùng để viết kịch bản` disabled or placeholder for Phase 7
-  * `Lưu trữ` or `Xóa` optional if easy
+Ưu tiên dùng URL search params:
 
-## Server Actions
+Ví dụ:
 
-Required actions:
+* `/app/ideas?tab=all&q=giay`
+* `/app/ideas?tab=all&q=review`
 
-* getContentIdeas or server query inside page
-* generateContentIdeasAction
-* saveGeneratedIdeasAction
-* createManualContentIdeaAction optional
-* updateContentIdeaStatusAction optional
+Không dùng localStorage.
+
+---
+
+### 2. Filter by Platform
+
+Thêm filter nền tảng:
+
+* Tất cả nền tảng
+* TikTok
+* YouTube Shorts
+* Facebook Reels
+
+URL param:
+
+* `platform=TikTok`
+* `platform=YouTube%20Shorts`
+* `platform=Facebook%20Reels`
+
+---
+
+### 3. Filter by Status
+
+Thêm filter trạng thái:
+
+* Tất cả trạng thái
+* Nháp
+* Sẵn sàng
+* Đã lên lịch
+* Đã đăng
+* Đã lưu trữ
+
+Mapping:
+
+* draft → Nháp
+* ready → Sẵn sàng
+* scheduled → Đã lên lịch
+* published → Đã đăng
+* archived → Đã lưu trữ
+
+URL param:
+
+* `status=draft`
+* `status=ready`
+* `status=archived`
+
+---
+
+### 4. Filter by Source Type
+
+Thêm filter nguồn tạo:
+
+* Tất cả nguồn
+* AI
+* Thủ công
+
+Mapping:
+
+* ai → AI
+* manual → Thủ công
+
+URL param:
+
+* `source=ai`
+* `source=manual`
+
+---
+
+### 5. Filter by Product
+
+Nếu `/app/ideas` đã có hoặc có thể query products của user hiện tại, thêm filter sản phẩm:
+
+* Tất cả sản phẩm
+* Danh sách sản phẩm theo tên
+
+URL param:
+
+* `productId=<uuid>`
+
+Không sửa logic Product Library.
+
+---
+
+### 6. Sort Ideas
+
+Thêm sort:
+
+* Mới nhất
+* Cũ nhất
+* Ưu tiên cao
+* Sẵn sàng trước
+
+URL param:
+
+* `sort=newest`
+* `sort=oldest`
+* `sort=priority`
+* `sort=ready`
+
+Behavior:
+
+* newest: created_at desc
+* oldest: created_at asc
+* priority: high → normal → low
+* ready: ready ideas first
+
+---
+
+## Tabs
+
+Giữ các tab:
+
+* `/app/ideas?tab=all`
+* `/app/ideas?tab=generate`
+* `/app/ideas?tab=ready`
+* `/app/ideas?tab=archived`
 
 Rules:
 
-* Must get current authenticated user.
-* Must not trust client user_id.
-* Must only read/update current user data.
-* Must use Supabase server client.
-* Must revalidate `/app/ideas`.
-* Must keep TypeScript clean.
-* Must fallback gracefully if AI fails.
+* `tab=all`: hiển thị tất cả ý tưởng trừ archived mặc định
+* `tab=generate`: hiển thị AI generator
+* `tab=ready`: chỉ hiển thị status = ready
+* `tab=archived`: chỉ hiển thị status = archived
+
+Search/filter/sort áp dụng cho:
+
+* tab=all
+* tab=ready
+* tab=archived
+
+Không hiện archived trong tab all trừ khi user lọc rõ status archived.
+
+---
+
+## Server Actions
+
+Cần có hoặc hoàn thiện:
+
+* `markIdeaReadyAction`
+* `archiveIdeaAction`
+* `restoreIdeaAction`
+
+Hoặc dùng action tổng quát:
+
+* `updateContentIdeaStatusAction`
+
+Rules:
+
+* Luôn lấy authenticated user từ Supabase server client
+* Không tin user_id từ client
+* Chỉ update dữ liệu của current user
+* Không xóa dữ liệu khi lưu trữ
+* Archive chỉ đổi status thành `archived`
+* Restore đổi status từ `archived` về `draft`
+* Revalidate `/app/ideas`
+
+---
+
+## Idea Card Actions
+
+Nếu status = draft:
+
+* Hiển thị nút: `Đánh dấu sẵn sàng`
+
+Nếu status = ready:
+
+* Hiển thị nút disabled/placeholder: `Viết kịch bản — sắp có`
+* Không triển khai Phase 7 trong phase này
+
+Nếu status = archived:
+
+* Hiển thị nút: `Khôi phục`
+
+Với idea chưa archived:
+
+* Hiển thị action: `Lưu trữ`
+
+---
+
+## Empty States
+
+Khi không có kết quả search/filter:
+
+Title:
+
+`Không tìm thấy ý tưởng phù hợp`
+
+Text:
+
+`Thử đổi từ khóa, bộ lọc hoặc tạo thêm ý tưởng mới bằng AI.`
+
+CTA:
+
+`Tạo ý tưởng bằng AI`
+
+Khi tab ready trống:
+
+Title:
+
+`Chưa có ý tưởng sẵn sàng viết kịch bản`
+
+Text:
+
+`Hãy chọn một ý tưởng nháp và đánh dấu sẵn sàng, hoặc tạo ý tưởng mới bằng AI.`
+
+CTA:
+
+`Tạo ý tưởng bằng AI`
+
+Khi tab archived trống:
+
+Title:
+
+`Chưa có ý tưởng đã lưu trữ`
+
+Text:
+
+`Các ý tưởng bạn lưu trữ sẽ xuất hiện tại đây.`
+
+---
+
+## UI Requirements
+
+Toolbar quản lý nên gồm:
+
+* Search input
+* Platform filter
+* Product filter nếu có
+* Status filter
+* Source filter
+* Sort select
+* Clear filters action
+
+UI phải:
+
+* Gọn
+* Dễ scan
+* Không quá nhiều text
+* Không render raw JSON
+* Không hiện undefined/null
+* Mobile responsive
+* Modern SaaS dashboard
+* White cards
+* Emerald/mint accents
+* Soft border
+* Rounded 20px–24px
+
+---
+
+## Interaction Requirements
+
+Mọi phần tử click được cần có:
+
+* cursor-pointer
+* hover state
+* active:scale-[0.98]
+* focus-visible:outline-none
+* focus-visible:ring-2
+* focus-visible:ring-emerald-500/30
+* transition-all duration-200 ease-out
+
+Disabled/loading:
+
+* cursor-not-allowed
+* opacity-50
+* không có hover mạnh
+
+Static cards:
+
+* Không thêm cursor-pointer nếu không click được
+
+---
 
 ## Technical Rules
 
-* Do not use localStorage.
-* AI must run server-side only.
-* Validate AI output before rendering/saving.
-* User must review before saving.
-* Existing Channel/Product modules must not break.
-* Keep mobile responsive.
-* Run `npm run build` after changes.
+* Không dùng localStorage
+* Không thêm package mới
+* Không đổi database schema
+* Không đổi AI provider/prompt
+* Không triển khai Phase 7
+* Không sửa Product Library logic
+* Không sửa Channel Profile logic
+* Không sửa Landing/Auth
+
+---
+
+## Allowed Files
+
+Có thể sửa:
+
+* app/app/ideas/page.tsx
+* components/app/ideas/*
+* actions/content-ideas.ts
+* types/content-idea.ts nếu cần type safety
+* components/app/AppSidebar.tsx nếu cần polish active state nhỏ
+
+---
+
+## Forbidden Files
+
+Không sửa:
+
+* lib/ai/*
+* lib/supabase/*
+* actions/products.ts
+* actions/channels.ts
+* app/app/channel/*
+* app/app/products/*
+* app/page.tsx
+* components/landing/*
+* package.json
+* database files or SQL
+
+---
 
 ## Success Criteria
 
-* `/app/ideas` loads.
-* Existing saved ideas display.
-* User can generate ideas with AI.
-* AI preview renders.
-* User can save selected generated ideas.
-* Saved ideas persist after refresh.
-* Missing API key shows friendly message.
-* No raw JSON shown.
-* No undefined/null shown.
-* `npm run build` passes.
+* `/app/ideas?tab=all` hoạt động
+* Search hoạt động
+* Platform filter hoạt động
+* Status filter hoạt động
+* Source filter hoạt động
+* Product filter hoạt động nếu có sản phẩm
+* Sort hoạt động
+* Đánh dấu sẵn sàng hoạt động
+* Lưu trữ hoạt động
+* Khôi phục hoạt động
+* Empty states rõ ràng
+* Không có raw JSON
+* Không có undefined/null
+* `npm run build` pass

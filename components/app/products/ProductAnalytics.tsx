@@ -98,7 +98,7 @@ export default function ProductAnalytics({
               </div>
             </div>
 
-            <div className="flex w-full flex-col gap-3">
+            <div className="flex max-h-[320px] w-full flex-col gap-3 overflow-y-auto pr-2">
               {categoryDistribution.map((item, index) => (
                 <div key={item.category} className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
@@ -135,7 +135,7 @@ export default function ProductAnalytics({
             </div>
           </div>
 
-          <div className="flex flex-col justify-center flex-1 space-y-5">
+          <div className="flex max-h-[420px] flex-1 flex-col justify-center space-y-5 overflow-y-auto pr-2">
             {topCommissionProducts.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center">
                 <p className="text-sm font-bold text-slate-600">

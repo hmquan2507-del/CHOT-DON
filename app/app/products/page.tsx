@@ -491,6 +491,7 @@ function CreateProductHelperCard() {
     </section>
   );
 }
+
 function ImportProductTab({ channel }: { channel: ChannelSummary | null }) {
   return (
     <section className="space-y-5">
