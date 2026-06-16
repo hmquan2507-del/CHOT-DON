@@ -1,21 +1,26 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useCallback, useState } from "react";
 import {
+  AlertCircle,
+  CheckCircle2,
   ExternalLink,
   FileText,
-  X,
-  CheckCircle2,
   Loader2,
-  AlertCircle,
   Sparkles,
+  X,
 } from "lucide-react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import ProductForm from "./ProductForm";
 import type { ProductFormDefaultValues } from "./ProductForm";
 import {
-  extractProductMetadata,
   enrichProductImport,
+  extractProductMetadata,
 } from "@/actions/product-imports";
 import type {
   EnrichProductImportResult,
@@ -39,10 +44,10 @@ type FeedbackMessage = {
 };
 
 const inputClassName =
-  "h-12 w-full rounded-2xl border border-[#DDE6EC] bg-white px-4 text-[15px] font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100/50 hover:border-slate-300";
+  "h-12 w-full rounded-2xl border border-[#DDE6EC] bg-white px-4 text-[15px] font-semibold text-slate-900 outline-none transition-all duration-200 ease-out placeholder:text-slate-400 hover:border-emerald-200 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:opacity-60";
 
 const textareaClassName =
-  "min-h-[100px] w-full resize-none rounded-2xl border border-[#DDE6EC] bg-white px-4 py-3 text-[15px] font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100/50 hover:border-slate-300";
+  "min-h-[100px] w-full resize-none rounded-2xl border border-[#DDE6EC] bg-white px-4 py-3 text-[15px] font-semibold text-slate-900 outline-none transition-all duration-200 ease-out placeholder:text-slate-400 hover:border-emerald-200 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:opacity-60";
 
 export default function ProductImportCard({ channel }: ProductImportCardProps) {
   const [url, setUrl] = useState("");
@@ -57,6 +62,8 @@ export default function ProductImportCard({ channel }: ProductImportCardProps) {
     useState<FeedbackMessage | null>(null);
   const [extractedDefaults, setExtractedDefaults] =
     useState<ProductFormDefaultValues | null>(null);
+
+  const isBusy = isExtracting || isEnriching;
 
   const handleExtract = useCallback(async () => {
     setError("");
@@ -184,15 +191,13 @@ export default function ProductImportCard({ channel }: ProductImportCardProps) {
     "Tạo bản nháp — bạn chỉnh sửa trước khi lưu",
   ];
 
-  const isBusy = isExtracting || isEnriching;
-
   function renderFeedbackMessage(message: FeedbackMessage) {
     const className =
       message.type === "success"
-        ? "bg-emerald-50 text-emerald-700 border border-emerald-200/60"
+        ? "border border-emerald-200/60 bg-emerald-50 text-emerald-700"
         : message.type === "warning"
-          ? "bg-amber-50 text-amber-700 border border-amber-200/60"
-          : "bg-slate-50 text-slate-600 border border-slate-200/70";
+          ? "border border-amber-200/60 bg-amber-50 text-amber-700"
+          : "border border-slate-200/70 bg-slate-50 text-slate-600";
 
     return (
       <div
@@ -211,9 +216,9 @@ export default function ProductImportCard({ channel }: ProductImportCardProps) {
   return (
     <>
       <section className="rounded-[24px] border border-slate-200/80 bg-white p-6 shadow-[0_18px_40px_rgba(15,23,42,0.06)] lg:p-8">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-12">
-          <div className="flex shrink-0 flex-col lg:w-[340px]">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-emerald-100/50 bg-emerald-50 text-emerald-600 shadow-sm">
+        <div className="grid gap-6 lg:grid-cols-[340px_minmax(0,1fr)] lg:items-start lg:gap-12">
+          <div className="flex shrink-0 flex-col rounded-[22px] border border-emerald-100 bg-emerald-50/45 p-5">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-emerald-100/50 bg-white text-emerald-600 shadow-sm">
               <ExternalLink className="h-7 w-7" />
             </div>
 
@@ -238,7 +243,7 @@ export default function ProductImportCard({ channel }: ProductImportCardProps) {
             </ul>
           </div>
 
-          <div className="flex-1 space-y-5">
+          <div className="space-y-5">
             <div>
               <label className="mb-2 block text-[13px] font-extrabold text-slate-700">
                 Link sản phẩm <span className="text-red-500">*</span>
@@ -279,7 +284,7 @@ export default function ProductImportCard({ channel }: ProductImportCardProps) {
                 type="button"
                 onClick={handleExtract}
                 disabled={isBusy}
-                className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 text-[15px] font-extrabold text-white shadow-[0_14px_34px_rgba(16,185,129,0.22)] transition hover:-translate-y-0.5 hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+                className="inline-flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-emerald-600 text-[15px] font-extrabold text-white shadow-[0_14px_34px_rgba(16,185,129,0.22)] transition-all duration-200 ease-out hover:bg-emerald-700 hover:shadow-[0_18px_42px_rgba(16,185,129,0.28)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-emerald-600 disabled:hover:shadow-[0_14px_34px_rgba(16,185,129,0.22)] disabled:active:scale-100"
               >
                 {isExtracting ? (
                   <>
@@ -298,12 +303,12 @@ export default function ProductImportCard({ channel }: ProductImportCardProps) {
                 type="button"
                 onClick={handleAIEnrich}
                 disabled={isBusy}
-                className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 text-[15px] font-extrabold text-emerald-700 transition hover:-translate-y-0.5 hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+                className="inline-flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 text-[15px] font-extrabold text-emerald-700 transition-all duration-200 ease-out hover:border-emerald-300 hover:bg-emerald-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:border-emerald-200 disabled:hover:bg-emerald-50 disabled:active:scale-100"
               >
                 {isEnriching ? (
                   <>
                     <Loader2 className="h-5 w-5 animate-spin" />
-                    AI đang gợi ý thông tin...
+                    AI đang phân tích...
                   </>
                 ) : (
                   <>
@@ -315,8 +320,12 @@ export default function ProductImportCard({ channel }: ProductImportCardProps) {
             </div>
 
             <div className="space-y-3">
-              {extractionMessage ? renderFeedbackMessage(extractionMessage) : null}
-              {enrichmentMessage ? renderFeedbackMessage(enrichmentMessage) : null}
+              {extractionMessage
+                ? renderFeedbackMessage(extractionMessage)
+                : null}
+              {enrichmentMessage
+                ? renderFeedbackMessage(enrichmentMessage)
+                : null}
             </div>
 
             <p className="text-center text-[12px] font-medium text-slate-400">
@@ -351,7 +360,8 @@ export default function ProductImportCard({ channel }: ProductImportCardProps) {
             <button
               type="button"
               onClick={handleCloseSheet}
-              className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+              className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl text-slate-400 transition-all duration-200 ease-out hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/30 active:scale-[0.98]"
+              aria-label="Đóng tạo sản phẩm từ link"
             >
               <X className="h-5 w-5" />
             </button>

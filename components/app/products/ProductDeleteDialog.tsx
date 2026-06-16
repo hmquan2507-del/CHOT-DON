@@ -8,7 +8,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Trash2 } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
+import { useFormStatus } from "react-dom";
 import type { Product } from "@/types/product";
 
 type ProductDeleteDialogProps = {
@@ -66,20 +67,38 @@ export default function ProductDeleteDialog({
           <button
             type="button"
             onClick={() => onOpenChange(false)}
-            className="flex h-11 items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 text-sm font-extrabold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:border-slate-300"
+            className="inline-flex h-11 cursor-pointer items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 text-sm font-extrabold text-slate-700 shadow-sm transition-all duration-200 ease-out hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30 active:scale-[0.98]"
           >
             Hủy
           </button>
 
-          <button
-            type="submit"
-            className="flex h-11 items-center justify-center gap-2 rounded-2xl bg-red-600 px-5 text-sm font-extrabold text-white shadow-sm transition hover:bg-red-700 hover:-translate-y-0.5"
-          >
-            <Trash2 className="h-4 w-4" />
-            Xóa sản phẩm
-          </button>
+          <DeleteSubmitButton />
         </form>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function DeleteSubmitButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-red-600 px-5 text-sm font-extrabold text-white shadow-sm transition-all duration-200 ease-out hover:bg-red-700 hover:shadow-[0_14px_30px_rgba(220,38,38,0.2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/20 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-55 disabled:hover:bg-red-600 disabled:hover:shadow-sm disabled:active:scale-100"
+    >
+      {pending ? (
+        <>
+          <Loader2 className="h-4 w-4 animate-spin" />
+          Đang xóa...
+        </>
+      ) : (
+        <>
+          <Trash2 className="h-4 w-4" />
+          Xóa sản phẩm
+        </>
+      )}
+    </button>
   );
 }

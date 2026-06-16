@@ -290,23 +290,37 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             </p>
           </div>
 
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <Link
-              href="/app/products?tab=create"
-              className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 text-sm font-extrabold text-white shadow-[0_14px_34px_rgba(16,185,129,0.22)] transition-all duration-200 ease-out hover:bg-emerald-700 hover:shadow-[0_18px_42px_rgba(16,185,129,0.28)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30 active:scale-[0.98]"
-            >
-              <PlusCircle className="h-4 w-4" />
-              Thêm sản phẩm
-            </Link>
+    <div className="flex flex-col gap-2 sm:flex-row">
+  {activeTab !== "create" ? (
+    <Link
+      href="/app/products?tab=create"
+      className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 text-sm font-extrabold text-white shadow-[0_14px_34px_rgba(16,185,129,0.22)] transition-all duration-200 ease-out hover:bg-emerald-700 hover:shadow-[0_18px_42px_rgba(16,185,129,0.28)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30 active:scale-[0.98]"
+    >
+      <PlusCircle className="h-4 w-4" />
+      Thêm sản phẩm
+    </Link>
+  ) : null}
 
-            <Link
-              href="/app/products?tab=import"
-              className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-extrabold text-slate-700 shadow-sm transition-all duration-200 ease-out hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30 active:scale-[0.98]"
-            >
-              <UploadCloud className="h-4 w-4" />
-              Nhập bằng link
-            </Link>
-          </div>
+  {activeTab !== "import" ? (
+    <Link
+      href="/app/products?tab=import"
+      className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-extrabold text-slate-700 shadow-sm transition-all duration-200 ease-out hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30 active:scale-[0.98]"
+    >
+      <UploadCloud className="h-4 w-4" />
+      Nhập bằng link
+    </Link>
+  ) : null}
+
+  {activeTab === "create" ? (
+    <Link
+      href="/app/products?tab=all"
+      className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-extrabold text-slate-700 shadow-sm transition-all duration-200 ease-out hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30 active:scale-[0.98]"
+    >
+      <Box className="h-4 w-4" />
+      Xem tất cả sản phẩm
+    </Link>
+  ) : null}
+</div>
         </div>
       </header>
 
@@ -428,23 +442,55 @@ function AllProductsTab({
 
 function CreateProductTab({ channel }: { channel: ChannelSummary | null }) {
   return (
-    <section className="grid items-start gap-6 xl:grid-cols-[minmax(0,0.36fr)_minmax(0,0.64fr)]">
-      <IntroCard
-        icon={PackagePlus}
-        title="Thêm sản phẩm mới"
-        description="Cung cấp thông tin sản phẩm để AI tạo ý tưởng và kịch bản tốt hơn."
-        bullets={[
-          "Nhập tên, giá, hoa hồng và link affiliate.",
-          "Bổ sung điểm mạnh và chân dung khách hàng.",
-          "Đánh dấu ưu tiên để biết sản phẩm nào nên đẩy nội dung.",
-        ]}
-      />
-
+    <section className="mx-auto w-full max-w-[1100px] space-y-5">
+      <CreateProductHelperCard />
       <ProductForm channel={channel} />
     </section>
   );
 }
 
+function CreateProductHelperCard() {
+  const items = [
+    "Tên, giá, hoa hồng và link affiliate",
+    "Điểm mạnh sản phẩm và chân dung khách hàng",
+    "Mức ưu tiên để AI biết sản phẩm nào nên đẩy nội dung",
+  ];
+
+  return (
+    <section className="rounded-[24px] border border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-white p-4 shadow-[0_12px_30px_rgba(15,23,42,0.035)] sm:p-5">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex items-start gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-[0_12px_28px_rgba(16,185,129,0.22)]">
+            <PackagePlus className="h-5 w-5" />
+          </div>
+
+          <div>
+            <h2 className="text-lg font-black tracking-[-0.03em] text-slate-950">
+              Nên chuẩn bị
+            </h2>
+            <p className="mt-1 text-sm font-medium leading-6 text-slate-500">
+              Nhập đủ dữ liệu nền để AI tạo ý tưởng và kịch bản chính xác hơn.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid gap-2 sm:grid-cols-3 lg:min-w-[620px]">
+          {items.map((item) => (
+            <div
+              key={item}
+              className="flex items-start gap-2 rounded-2xl border border-emerald-100 bg-white/80 px-3 py-2.5"
+            >
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+              <span className="text-xs font-extrabold leading-5 text-slate-600">
+                {item}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
 function ImportProductTab({ channel }: { channel: ChannelSummary | null }) {
   return (
     <section className="space-y-5">
