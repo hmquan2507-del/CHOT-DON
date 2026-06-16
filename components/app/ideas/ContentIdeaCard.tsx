@@ -1,19 +1,22 @@
 import type { ReactNode } from "react";
+import type { LucideIcon } from "lucide-react";
 import {
   Archive,
   Bookmark,
   Calendar,
   CheckCircle2,
   Clock,
-  FileText,
   Flag,
+  RotateCcw,
   Tag,
 } from "lucide-react";
 import {
   archiveContentIdeaAction,
   markContentIdeaReadyAction,
+  restoreContentIdeaAction,
 } from "@/actions/content-ideas";
 import type { ContentIdea } from "@/types/content-idea";
+import ContentIdeaActionButton from "./ContentIdeaActionButton";
 
 type ContentIdeaCardProps = {
   idea: ContentIdea;
@@ -62,36 +65,21 @@ function getStatusMeta(status?: string | null) {
     };
   }
 
+  if (status === "published") {
+    return {
+      label: "Đã đăng",
+      className: "bg-violet-50 text-violet-700 border-violet-100",
+    };
+  }
+
   return {
     label: "Nháp",
     className: "bg-sky-50 text-sky-700 border-sky-100",
   };
 }
 
-function getPriorityMeta(priority?: string | null) {
-  if (priority === "high") {
-    return {
-      label: "Cao",
-      className: "bg-red-50 text-red-600 border-red-100",
-    };
-  }
-
-  if (priority === "low") {
-    return {
-      label: "Thấp",
-      className: "bg-slate-50 text-slate-500 border-slate-200",
-    };
-  }
-
-  return {
-    label: "Bình thường",
-    className: "bg-emerald-50 text-emerald-700 border-emerald-100",
-  };
-}
-
 export default function ContentIdeaCard({
   idea,
-  channelName,
   productName,
 }: ContentIdeaCardProps) {
   const hashtags = splitHashtags(idea.hashtags);
@@ -102,7 +90,6 @@ export default function ContentIdeaCard({
   );
 
   const statusMeta = getStatusMeta(idea.status);
-  const priorityMeta = getPriorityMeta(idea.priority);
 
   const isDraft = !idea.status || idea.status === "draft";
   const isReady = idea.status === "ready" || idea.status === "ready_for_script";
@@ -113,11 +100,30 @@ export default function ContentIdeaCard({
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-wrap items-center gap-1.5">
           <Badge>{safeValue(idea.platform, "Platform")}</Badge>
-          <Badge tone="slate">{safeValue(idea.content_format, "Format")}</Badge>
-          <Badge tone="violet">{idea.source_type === "ai" ? "AI" : "Thủ công"}</Badge>
+
+          <span
+            className={`rounded-full border px-2 py-0.5 text-[10px] font-extrabold ${statusMeta.className}`}
+          >
+            {statusMeta.label}
+          </span>
+
+          <Badge tone="violet">
+            {idea.source_type === "ai" ? "AI" : "Thủ công"}
+          </Badge>
         </div>
 
-        {!isArchived ? (
+        {isArchived ? (
+          <form action={restoreContentIdeaAction.bind(null, idea.id)}>
+            <button
+              type="submit"
+              className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-400 transition-all duration-200 ease-out hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30 active:scale-[0.98]"
+              aria-label="Khôi phục ý tưởng"
+              title="Khôi phục"
+            >
+              <RotateCcw className="h-4 w-4" />
+            </button>
+          </form>
+        ) : (
           <form action={archiveContentIdeaAction.bind(null, idea.id)}>
             <button
               type="submit"
@@ -128,10 +134,6 @@ export default function ContentIdeaCard({
               <Bookmark className="h-4 w-4" />
             </button>
           </form>
-        ) : (
-          <div className="inline-flex h-8 w-8 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-400">
-            <Archive className="h-4 w-4" />
-          </div>
         )}
       </div>
 
@@ -139,45 +141,33 @@ export default function ContentIdeaCard({
         {safeValue(idea.title, "Ý tưởng chưa đặt tên")}
       </h3>
 
-      <p className="mt-1.5 line-clamp-1 text-sm font-medium leading-6 text-slate-500">
+      <p className="mt-1 line-clamp-1 text-sm font-medium leading-6 text-slate-500">
         {safeValue(idea.hook)}
       </p>
 
-      <div className="mt-3 grid gap-1.5 text-xs font-bold text-slate-500 sm:grid-cols-3">
+      <div className="mt-2.5 grid gap-1.5 text-xs font-bold text-slate-500 sm:grid-cols-3">
         <MetaItem icon={Tag} text={safeValue(productName, "Không gắn SP")} />
         <MetaItem icon={Flag} text={safeValue(idea.goal, "Chưa có mục tiêu")} />
         <MetaItem icon={Calendar} text={formatDate(idea.created_at)} />
       </div>
 
-      <div className="mt-3 space-y-1.5 rounded-2xl border border-slate-100 bg-slate-50/70 p-3">
+      <div className="mt-3 space-y-1.5 rounded-2xl border border-slate-100 bg-slate-50/70 p-2.5">
         <SummaryRow label="Góc" value={safeValue(idea.angle)} />
         <SummaryRow label="CTA" value={safeValue(idea.cta)} compact />
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-1.5">
-        <span
-          className={`rounded-full border px-2.5 py-1 text-[11px] font-extrabold ${statusMeta.className}`}
-        >
-          {statusMeta.label}
-        </span>
-
-        <span
-          className={`rounded-full border px-2.5 py-1 text-[11px] font-extrabold ${priorityMeta.className}`}
-        >
-          {priorityMeta.label}
-        </span>
-
         {visibleHashtags.map((hashtag) => (
           <span
             key={hashtag}
-            className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-bold text-slate-500"
+            className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-bold text-slate-500"
           >
             {hashtag}
           </span>
         ))}
 
         {hiddenHashtagCount > 0 ? (
-          <span className="rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-1 text-[11px] font-extrabold text-emerald-700">
+          <span className="rounded-full border border-emerald-100 bg-emerald-50 px-2 py-0.5 text-[10px] font-extrabold text-emerald-700">
             +{hiddenHashtagCount}
           </span>
         ) : null}
@@ -186,36 +176,37 @@ export default function ContentIdeaCard({
       <div className="mt-3 flex flex-wrap items-center justify-end gap-2 border-t border-slate-100 pt-3">
         {isDraft ? (
           <form action={markContentIdeaReadyAction.bind(null, idea.id)}>
-            <button
-              type="submit"
-              className="inline-flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-2xl bg-emerald-600 px-3 text-xs font-extrabold text-white shadow-[0_8px_18px_rgba(16,185,129,0.16)] transition-all duration-200 ease-out hover:bg-emerald-700 hover:shadow-[0_12px_24px_rgba(16,185,129,0.22)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30 active:scale-[0.98]"
-            >
+            <ContentIdeaActionButton pendingLabel="Đang lưu..." variant="primary">
               <CheckCircle2 className="h-3.5 w-3.5" />
               Sẵn sàng
-            </button>
+            </ContentIdeaActionButton>
           </form>
         ) : isReady ? (
           <button
             type="button"
             disabled
-            className="inline-flex h-9 cursor-not-allowed items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-slate-50 px-3 text-xs font-extrabold text-slate-400 opacity-60"
+            className="inline-flex h-8 cursor-not-allowed items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-slate-50 px-3 text-xs font-extrabold text-slate-400 opacity-60"
           >
             <Clock className="h-3.5 w-3.5" />
             Viết kịch bản — sắp có
           </button>
         ) : null}
 
-        {!isArchived ? (
+        {isArchived ? (
+          <form action={restoreContentIdeaAction.bind(null, idea.id)}>
+            <ContentIdeaActionButton pendingLabel="Đang khôi phục...">
+              <RotateCcw className="h-3.5 w-3.5" />
+              Khôi phục
+            </ContentIdeaActionButton>
+          </form>
+        ) : (
           <form action={archiveContentIdeaAction.bind(null, idea.id)}>
-            <button
-              type="submit"
-              className="inline-flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-3 text-xs font-extrabold text-slate-600 transition-all duration-200 ease-out hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30 active:scale-[0.98]"
-            >
+            <ContentIdeaActionButton pendingLabel="Đang lưu trữ...">
               <Archive className="h-3.5 w-3.5" />
               Lưu trữ
-            </button>
+            </ContentIdeaActionButton>
           </form>
-        ) : null}
+        )}
       </div>
     </article>
   );
@@ -231,7 +222,7 @@ function SummaryRow({
   compact?: boolean;
 }) {
   return (
-    <div className="grid grid-cols-[42px_minmax(0,1fr)] gap-2">
+    <div className="grid grid-cols-[38px_minmax(0,1fr)] gap-2">
       <span className="text-xs font-black text-emerald-700">{label}</span>
       <p
         className={[
@@ -250,11 +241,10 @@ function Badge({
   tone = "emerald",
 }: {
   children: ReactNode;
-  tone?: "emerald" | "slate" | "violet";
+  tone?: "emerald" | "violet";
 }) {
   const className = {
     emerald: "bg-emerald-50 text-emerald-700 border-emerald-100",
-    slate: "bg-slate-50 text-slate-500 border-slate-200",
     violet: "bg-violet-50 text-violet-700 border-violet-100",
   }[tone];
 
@@ -271,7 +261,7 @@ function MetaItem({
   icon: Icon,
   text,
 }: {
-  icon: typeof FileText;
+  icon: LucideIcon;
   text: string;
 }) {
   return (
@@ -280,6 +270,4 @@ function MetaItem({
       <span className="truncate">{text}</span>
     </div>
   );
-
 }
-

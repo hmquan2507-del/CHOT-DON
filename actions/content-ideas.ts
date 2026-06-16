@@ -370,14 +370,33 @@ export async function updateContentIdeaStatusAction(
   redirect("/app/ideas?tab=all");
 }
 
+export async function markIdeaReadyAction(ideaId: string): Promise<void> {
+  await updateContentIdeaStatusAction(ideaId, "ready_for_script");
+}
+
+export async function archiveIdeaAction(ideaId: string): Promise<void> {
+  await updateContentIdeaStatusAction(ideaId, "archived");
+}
+
+export async function restoreIdeaAction(ideaId: string): Promise<void> {
+  await updateContentIdeaStatusAction(ideaId, "draft");
+}
+
+// Keep old names so existing components do not break.
 export async function markContentIdeaReadyAction(
   ideaId: string,
 ): Promise<void> {
-  await updateContentIdeaStatusAction(ideaId, "ready_for_script");
+  await markIdeaReadyAction(ideaId);
 }
 
 export async function archiveContentIdeaAction(
   ideaId: string,
 ): Promise<void> {
-  await updateContentIdeaStatusAction(ideaId, "archived");
+  await archiveIdeaAction(ideaId);
+}
+
+export async function restoreContentIdeaAction(
+  ideaId: string,
+): Promise<void> {
+  await restoreIdeaAction(ideaId);
 }
